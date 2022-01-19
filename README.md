@@ -1,10 +1,43 @@
-# CS1813 Group 8
-<<<<<<< HEAD
 
-=======
-test1
->>>>>>> a24587b1fa9b291208b2f8b99ea18707d4a0006a
+# Car Park System - Group 8
 
-test 2
+This is a software representation of the 'Holborn Car Park System' described in the specification provided to us
 
-test3
+## Run Locally
+
+Clone the project
+
+```bash
+  git clone https://github.com/RHUL-CS-Projects/CS1813_2022_08.git
+```
+
+Go to the project directory
+
+```bash
+  cd CS1813_2022_08
+```
+
+Install dependencies
+
+```bash
+  pip install -r requirements.txt
+```
+
+Start the web server
+
+```bash
+  # To be added later
+```
+
+
+## Authors
+
+- [@Charles Kasina](mailto:charles.kasina.2021@live.rhul.ac.uk)
+- [@Oscar Cowper](mailto:oscar.cowper.2021@live.rhul.ac.uk)
+- [@Zuhayr Mohsen](mailto:mohammed.mohsen.2021@live.rhul.ac.uk)
+- [@Yazan Al-Arab](mailto:yazan.al-arab.2021@live.rhul.ac.uk)
+
+## Documentation
+
+[Documentation](https://rhul-my.sharepoint.com/:w:/g/personal/zkac421_live_rhul_ac_uk/ESBX9jK43lpOs7zPtn-I0D4B5ni_cjCet1EisgGqd_Nacg?e=z6esMn&isSPOFile=1)
+
