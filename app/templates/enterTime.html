@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block head %}
-	<h1>Sign In</h1>
-	<h7> If you have no ID leave blank </h7>
+	<h1>How long are you staying?</h1>
+	<h7>Enter number of hours</h7>
 {% endblock %}
 
 {% block body %}
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
-            {{ form.customerID.label }}<br>
-            {{ form.customerID(size=32) }}
+            {{ form.timePeriod.label }}<br>
+            {{ form.timePeriod(size=32) }}
         </p>
         <p>{{ form.submit() }}</p>
     </form>
