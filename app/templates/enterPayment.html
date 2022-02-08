@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<h1>Enter Payment</h1>
+{% endblock %}
+
+{% block body %}
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
