@@ -26,7 +26,8 @@ Install dependencies
 Start the web server
 
 ```bash
-  # To be added later
+  run the command: $flask run
+  in your web browser go to localhost:5000
 ```
 
 
