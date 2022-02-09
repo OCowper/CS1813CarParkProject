@@ -7,8 +7,7 @@ class DataHandler:
     def __init__(self):
         self.customerID = None # str
         self.timePeriod = None # int
-        self.discount = None # int
-
+        
     def getDiscount(self):
         if self.customerID.endswith("2"):
             return 0.5
@@ -27,7 +26,7 @@ class DataHandler:
         else:
             price = 20
 
-        return price - (price * self.getDiscount())
+        return price * self.getDiscount()
 
 
 data = DataHandler()
