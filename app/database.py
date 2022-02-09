@@ -30,6 +30,7 @@ class Customer(db.Model):
     surname = db.Column(db.String(MAX_NAME_LENGTH), nullable=False)
     local_authority = db.Column(db.Boolean, nullable=False)
     local_consultancy = db.Column(db.Boolean, nullable=False)
+    employee = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
         return "License Plate {}, First Name {}, Surname {}, Local Authority {}, Local Consultancy {}".format(self.plate, self.first_name, self.surname, self.local_authority, self.local_consultancy)
