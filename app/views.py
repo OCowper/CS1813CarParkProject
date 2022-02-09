@@ -67,4 +67,4 @@ def payment():
     if form.validate_on_submit():
         return redirect('/index')
 
-    return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice()}:02")
+    return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
