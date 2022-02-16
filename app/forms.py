@@ -13,7 +13,7 @@ class enterTime(FlaskForm):
     submit = SubmitField('Next')
     
 class paymentForm(FlaskForm):
-    submit = SubmitField('Done: Enter Car Park')
+    submit = SubmitField('Done: Exit Car Park')
 
 class exitButton(FlaskForm):
     submit = SubmitField('Exit the Car Park')

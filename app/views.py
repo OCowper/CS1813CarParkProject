@@ -2,6 +2,7 @@ from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
 import time
+import math
 
 
 class DataHandler:
@@ -25,8 +26,7 @@ class DataHandler:
     def calculatePrice(self):
         price = 0
         if self.totalTime < 70:
-            price = self.totalTime * 2 # £2
-
+            price = math.trunc(self.totalTime / 10) + 1
         else:
             price = 20
 
