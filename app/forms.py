@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired
 
 class enterCustNP(FlaskForm):
     customerNP = StringField('Customer Number Plate')
-    submit = SubmitField('Next')
+    submit = SubmitField('Enter the Car Park')
 
 class enterTime(FlaskForm):
     timePeriod = StringField('Hour Number')
@@ -14,3 +14,6 @@ class enterTime(FlaskForm):
     
 class paymentForm(FlaskForm):
     submit = SubmitField('Done: Enter Car Park')
+
+class exitButton(FlaskForm):
+    submit = SubmitField('Exit the Car Park')
