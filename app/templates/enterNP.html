@@ -2,15 +2,15 @@
 
 {% block head %}
 	<h1>Sign In</h1>
-	<h7> If you have no ID leave blank </h7>
+	<h7> Enter your numberplate </h7>
 {% endblock %}
 
 {% block body %}
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>
-            {{ form.customerID.label }}<br>
-            {{ form.customerID(size=32) }}
+            {{ form.customerNP.label }}<br>
+            {{ form.customerNP(size=32) }}
         </p>
         <p>{{ form.submit() }}</p>
     </form>

@@ -4,8 +4,8 @@ from wtforms.validators import DataRequired
 
 
 
-class enterCustID(FlaskForm):
-    customerID = StringField('Customer Number')
+class enterCustNP(FlaskForm):
+    customerNP = StringField('Customer Number Plate')
     submit = SubmitField('Next')
 
 class enterTime(FlaskForm):

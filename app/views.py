@@ -5,14 +5,14 @@ from app.forms import *
 
 class DataHandler:
     def __init__(self):
-        self.customerID = None # str
+        self.customerNP = None # str
         self.timePeriod = None # int
         
     def getDiscount(self):
-        if self.customerID.endswith("2"):
+        if self.customerNP.endswith("A"):
             return 0.5
 
-        elif self.customerID.endswith("5"):
+        elif self.customerNP.endswith("B"):
             return 0
 
         else:
@@ -41,12 +41,12 @@ def index():
 def login():
     if request.method == "POST":
         formData = dict(request.form)
-        data.customerID = formData["customerID"]
+        data.customerNP = formData["customerNP"]
 
-    form = enterCustID()
+    form = enterCustNP()
     if form.validate_on_submit():
             return redirect('/time')
-    return render_template('enterID.html', title='Enter Your Customer ID', form=form)
+    return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form)
 
 @app.route('/time', methods = ['GET', 'POST'])
 def time():
