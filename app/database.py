@@ -25,7 +25,8 @@ class Tickets(db.Model):
         return "ID {}, License Plate {}, Entry Time {}".format(self.id, self.plate, self.entry_time)
 
 class Customer(db.Model):
-    plate = db.Column(db.String(MAX_PLATE_LENGTH), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    plate = db.Column(db.String(MAX_PLATE_LENGTH), nullable=False)
     first_name = db.Column(db.String(MAX_NAME_LENGTH), nullable=False)
     surname = db.Column(db.String(MAX_NAME_LENGTH), nullable=False)
     local_authority = db.Column(db.Boolean, nullable=False)
