@@ -1,7 +1,9 @@
 
 # Car Park System - Group 8
 
-This is a software representation of the 'Holborn Car Park System' described in the specification provided to us
+This is a software representation of the 'Holborn Car Park System' described in the specification provided to us.
+
+Version: Python 3.9
 
 ## Run Locally
 
