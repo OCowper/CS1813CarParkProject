@@ -12,6 +12,9 @@ class DataHandler:
         self.startTime = None # int
         self.totalTime = None # int
         self.happyHour = False # boolean
+
+    def getHappyHour(self):
+        return self.happyHour
         
     def getDiscount(self):
         if self.customerNP.endswith("A"):
@@ -37,6 +40,9 @@ class DataHandler:
 
     def endTimer(self):
         self.totalTime = time.time() - self.startTime
+
+    def toggleHappyHour(self):
+        self.happyHour = not(self.happyHour)
 
 data = DataHandler()
 
@@ -82,14 +88,27 @@ def payment():
     form = paymentForm()
     if form.validate_on_submit():
         return redirect('/index')
-
-    return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
+    if data.getHappyHour():
+        return render_template('enterPaymentHappy.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
+    else:
+        return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
 
 @app.route('/mLogin', methods = ['GET', 'POST'])
 def mLogin():
     form = mLoginForm()
     if form.validate_on_submit():
         
-        return redirect('/index')
+        return redirect('/mView')
     return render_template('mLogin.html', title = 'Manager Sign In', form = form)
+
+@app.route('/mView', methods = ['GET', 'POST'])
+def mView():
+    if data.getHappyHour():
+        form = endHappy()
+    else:
+        form = startHappy()
+    if form.validate_on_submit():
+        data.toggleHappyHour()
+        return redirect('/mView')
+    return render_template('mView.html', title = 'Manager Menu', form = form)
 

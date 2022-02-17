@@ -23,6 +23,11 @@ class mLoginForm(FlaskForm):
     password = PasswordField('Password', validators = [DataRequired()])
     submit = SubmitField('Sign In')
 
+class startHappy(FlaskForm):
+    happyHourToggle = SubmitField('Start Happy Hour')
+    
+class endHappy(FlaskForm):
+    happyHourToggle = SubmitField('End Happy Hour')
 
     
     
