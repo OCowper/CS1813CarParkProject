@@ -84,3 +84,12 @@ def payment():
         return redirect('/index')
 
     return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
+
+@app.route('/mLogin', methods = ['GET', 'POST'])
+def mLogin():
+    form = mLoginForm()
+    if form.validate_on_submit():
+        
+        return redirect('/index')
+    return render_template('mLogin.html', title = 'Manager Sign In', form = form)
+
