@@ -1,8 +1,11 @@
+#TO DO: INITIALISE CURRENT TICKET CLASS, APPLY DISCOUNT
+
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
 import time
 import math
+from app import database
 
 
 class DataHandler:
@@ -12,6 +15,7 @@ class DataHandler:
         self.startTime = None # int
         self.totalTime = None # int
         self.happyHour = False # boolean
+        self.curTicket = None
 
     def getHappyHour(self):
         return self.happyHour
@@ -26,6 +30,12 @@ class DataHandler:
         else:
             return 1
 
+    def setCurTicket(self, curTicket):
+        self.curTicket = curTicket
+
+    def getCurTicket(self):
+        return self.curTicket
+
     def calculatePrice(self):
         price = 0
         if self.totalTime < 70:
@@ -33,7 +43,7 @@ class DataHandler:
         else:
             price = 20
 
-        return price * self.getDiscount()
+        return price
 
     def startTimer(self):
         self.startTime = time.time()
@@ -41,8 +51,16 @@ class DataHandler:
     def endTimer(self):
         self.totalTime = time.time() - self.startTime
 
+    def calcTime(self):
+        self.totalTime = self.curTicket.exit_time - self.curTicket.entry_time
+
     def toggleHappyHour(self):
         self.happyHour = not(self.happyHour)
+
+class nowTicket:
+    def __init__(self):
+
+
 
 data = DataHandler()
 
@@ -60,9 +78,21 @@ def login():
 
     form = enterCustNP()
     if form.validate_on_submit():
-            data.startTimer()
-            return redirect('/exit')
+            #data.startTimer()
+            startTime = time.time()
+            curTicketNum = database.Tickets.query.order_by(database.Tickets.id)
+            tempNum = 0
+            for ticket in curTicketNum:
+                if ticket.id > tempNum:
+                    tempNum = ticket.id
+            tempNum = tempNum + 1
+            curTicket = database.Tickets(id = tempNum, plate = form.customerNP.data, entry_time = startTime, paid = False)
+            database.db.session.add(curTicket)
+            database.db.session.commit()
+            data.setCurTicket(curTicket)
+            return redirect('/entry')
     return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form)
+
 
 @app.route('/timing', methods = ['GET', 'POST'])
 def timing():
@@ -74,14 +104,26 @@ def timing():
         return redirect('/payment')
     return render_template('enterTime.html', title = 'How long are you staying?', form=form)
 
-@app.route('/exit', methods = ['GET', 'POST'])
-def exit():
-    form = exitButton()
+@app.route('/entry', methods = ['GET', 'POST'])
+def entry():
+    form = entryButton()
     if form.validate_on_submit():
-        data.endTimer()
-        return redirect('/payment')
-    return render_template('exitB.html', title = 'Press to Enter', form = form)
+        return redirect('/index')
+    return render_template('entryB.html', title = 'Press to Enter', form = form, number = data.getCurTicket().id)
 
+@app.route('/signOut', methods = ['GET', 'POST'])
+def signOut():
+    form = enterTicket()
+    if form.validate_on_submit():
+        curTicket = database.Tickets.query.filter_by(id = form.ticketNumber.data).first()
+        if curTicket.paid == False:
+            curTicket.exit_time = time.time()
+            database.db.session.commit()
+            data.setCurTicket(curTicket)
+            data.calcTime()
+            return redirect('/payment')
+        else:
+            return redirect('/tryAgain')
     
 @app.route('/payment', methods = ['GET', 'POST'])
 def payment():
@@ -112,3 +154,9 @@ def mView():
         return redirect('/mView')
     return render_template('mView.html', title = 'Manager Menu', form = form)
 
+@app.route('/tryAgain', methods = ['GET', 'POST'])
+def tryAgain():
+    form = returnB()
+    if form.validate_on_submit():
+        return redirect('/signOut')
+    return render_template('tryAgain.html', title = 'Please Try Again', form = form)
