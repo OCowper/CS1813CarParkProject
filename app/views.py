@@ -3,6 +3,8 @@ from app import app
 from app.forms import *
 import time
 import math
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 
 class DataHandler:
@@ -60,7 +62,16 @@ def login():
 
     form = enterCustNP()
     if form.validate_on_submit():
-            data.startTimer()
+            #data.startTimer()
+            startTime = time.time()
+            curTicketNum = database.tickets.query.first()
+            if curTicketNum.id == 0:
+                curTicketNum = 1
+            else:
+                curTicketNum = curTicketNum + 1
+            curTicket = database.tickets(id = curTicketNum, plate = form.customerNP.data, entry_time = startTime)
+            db.session.add(curTicket)
+            db.session.commit()
             return redirect('/exit')
     return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form)
 
