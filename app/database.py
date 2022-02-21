@@ -1,14 +1,6 @@
-from app import app
+from app import db
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
-
-# -------- database.db --------
-
-# Initialise Database
-db = SQLAlchemy(app)
-
-# Create Model
 MAX_PLATE_LENGTH = 8
 MAX_NAME_LENGTH = 20
 MAX_FEE_LENGTH = 20
