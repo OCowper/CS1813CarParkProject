@@ -3,8 +3,6 @@ from app import app
 from app.forms import *
 import time
 import math
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
 
 class DataHandler:
