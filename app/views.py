@@ -114,13 +114,14 @@ def signOut():
     if form.validate_on_submit():
         curTicket = database.Tickets.query.filter_by(id = form.ticketNumber.data).first()
         if curTicket.paid == False:
-            curTicket.exit_time = time.time()
+            curTicket._time = time.time()
             database.db.session.commit()
             data.setCurTicket(curTicket)
             data.calcTime()
             return redirect('/payment')
         else:
             return redirect('/tryAgain')
+    return render_template('enterT.html', title = 'Enter Ticket Number', form = form)
     
 @app.route('/payment', methods = ['GET', 'POST'])
 def payment():
