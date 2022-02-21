@@ -7,3 +7,4 @@ Werkzeug==2.0.2
 python-dotenv
 Flask-WTF
 Flask-SQLAlchemy==2.5.1
+flask-migrate
