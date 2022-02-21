@@ -30,6 +30,7 @@ class DataHandler:
         else:
             return 1
 
+
     def setCurTicket(self, curTicket):
         self.curTicket = curTicket
 
@@ -85,7 +86,7 @@ def login():
             curTicket = database.Tickets(id = tempNum, plate = form.customerNP.data, entry_time = startTime, paid = False)
             database.db.session.add(curTicket)
             database.db.session.commit()
-            data.setCurTicket(curTicket)
+            data.setCurTicket(tempNum)
             return redirect('/entry')
     return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form)
 
@@ -105,7 +106,7 @@ def entry():
     form = entryButton()
     if form.validate_on_submit():
         return redirect('/index')
-    return render_template('entryB.html', title = 'Press to Enter', form = form, number = data.getCurTicket().id)
+    return render_template('entryB.html', title = 'Press to Enter', form = form, number = data.getCurTicket())
 
 @app.route('/signOut', methods = ['GET', 'POST'])
 def signOut():
