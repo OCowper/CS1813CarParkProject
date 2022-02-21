@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<h1>Press to Enter the Car Park</h1>
+	<h2>Your ticket number is {{ number }}</h2>
+	<h3>Thank you!</h3>
+{% endblock %}
+
+{% block body %}
+
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

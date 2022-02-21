@@ -16,8 +16,8 @@ MAX_FEE_LENGTH = 20
 class Tickets(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     plate = db.Column(db.String(MAX_PLATE_LENGTH), nullable=False)
-    entry_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    exit_time = db.Column(db.DateTime)
+    entry_time = db.Column(db.Integer, nullable=False)
+    exit_time = db.Column(db.Integer)
     fee = db.Column(db.String(MAX_FEE_LENGTH))
     paid = db.Column(db.Boolean, nullable=False)
 

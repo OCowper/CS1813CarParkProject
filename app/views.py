@@ -57,10 +57,6 @@ class DataHandler:
     def toggleHappyHour(self):
         self.happyHour = not(self.happyHour)
 
-class nowTicket:
-    def __init__(self):
-
-
 
 data = DataHandler()
 

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, IntegerField
 from wtforms.validators import DataRequired
 
 
@@ -15,8 +15,15 @@ class enterTime(FlaskForm):
 class paymentForm(FlaskForm):
     submit = SubmitField('Done: Exit Car Park')
 
-class exitButton(FlaskForm):
-    submit = SubmitField('Exit the Car Park')
+class entryButton(FlaskForm):
+    submit = SubmitField('Enter the Car Park')
+
+class enterTicket(FlaskForm):
+    ticketNumber = IntegerField('Ticket Number')
+    submit = SubmitField('Next')
+
+class returnB(FlaskForm):
+    submit = SubmitField('Return')
 
 class mLoginForm(FlaskForm):
     username = StringField('Username', validators = [DataRequired()])
