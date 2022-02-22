@@ -90,7 +90,6 @@ def login():
 
     form = enterCustNP()
     if form.validate_on_submit():
-            #data.startTimer()
             startTime = time.time()
             ticketsUpdate(form.customerNP.data, startTime)
             return redirect('/entry')
