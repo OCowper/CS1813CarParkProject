@@ -195,13 +195,11 @@ def viewReport():
             if ticket.paid:
                 entryDate = datetime.fromtimestamp(ticket.entry_time).date()
                 if entryDate.strftime("%Y-%m-%d") == form.date.data:
-                    entryTime = datetime.fromtimestamp(ticket.entry_time).strftime("%Y-%m-%d %H:%M:%S")
-                    exitTime = datetime.fromtimestamp(ticket.exit_time).strftime("%Y-%m-%d %H:%M:%S")
+                    entryTime = datetime.fromtimestamp(ticket.entry_time).strftime("%H:%M:%S")
+                    exitTime = datetime.fromtimestamp(ticket.exit_time).strftime("%H:%M:%S")
                     tableData.append((str(ticket.id), str(ticket.plate), str(entryTime), str(exitTime), str(ticket.fee)))
 
         return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData, form=form, numCars = carsInside)
-        # tableData = ((id, plate, entry_time, exit_time, fee))
-        # use paid to check if to include that row
 
     return render_template('viewReport.html', title = 'View Reports', headings=[], tableData=[], form=form, numCars = carsInside)
 
