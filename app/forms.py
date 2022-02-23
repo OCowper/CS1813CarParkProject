@@ -38,5 +38,5 @@ class endHappy(FlaskForm):
 
     
 class dateSelect(FlaskForm):
-    date = SelectField('Date', choices=[])
+    date = SelectField('Date: ', choices=[])
     submit = SubmitField()

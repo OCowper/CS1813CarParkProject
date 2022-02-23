@@ -13,20 +13,11 @@
     {{ form.submit() }}
 </form>
 
+{% for table in tables %}
 
-<table>
-    <tr>
-        {% for header in headings %}
-        <th>{{ header }}</th>
-        {% endfor %}
-    </tr>
-    {% for row in tableData %}
-    <tr>
-        {% for cell in row %}
-        <td>{{ cell }}</td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
-</table>
+{{titles[loop.index]}}
+{{ table|safe }}
+
+{% endfor %}
 
 {% endblock %}

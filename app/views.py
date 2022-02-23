@@ -1,6 +1,10 @@
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
+import pandas as pd
+import numpy as np
+import sqlite3
+import os
 import time
 import math
 from app import database
@@ -168,6 +172,19 @@ def tryAgain():
     return render_template('tryAgain.html', title = 'Please Try Again', form = form)
 
 
+
+def timestampToDate(x):
+    return datetime.fromtimestamp(x).date()
+
+def timestampToDateTime(x):
+    return datetime.fromtimestamp(x)
+
+def checkSameDate(datetime64Obj, dateString):
+    timestamp = pd.to_datetime(datetime64Obj)
+    return timestamp.strftime("%Y-%m-%d") == dateString
+
+checkSameDateVect = np.vectorize(checkSameDate)
+
 @app.route('/viewreport', methods=['GET', 'POST'])
 def viewReport():
     allCars = database.Tickets.query.order_by(database.Tickets.id)
@@ -187,21 +204,28 @@ def viewReport():
                 dates.append(entryDate)
 
     form.date.choices = [(i.strftime("%Y-%m-%d"), i.strftime("%Y-%m-%d")) for i in dates]
-        
+
+    con = sqlite3.connect(os.path.join("app", "database.db"))
+    df = pd.read_sql_query("SELECT * from tickets", con)
+    con.close()
+
+    # df = df.reset_index(drop=True)
+    df = df[df['paid'] == 1]
+    df['entry_time'] = df['entry_time'].map(timestampToDateTime)
+    df['exit_time'] = df['exit_time'].map(timestampToDateTime)
+
     if request.method == 'POST':
-        headings = ("ID", "Plate", "Entry Time", "Exit Time", "Fee")
-        tableData = []
-        for ticket in tableDataRaw:
-            if ticket.paid:
-                entryDate = datetime.fromtimestamp(ticket.entry_time).date()
-                if entryDate.strftime("%Y-%m-%d") == form.date.data:
-                    entryTime = datetime.fromtimestamp(ticket.entry_time).strftime("%H:%M:%S")
-                    exitTime = datetime.fromtimestamp(ticket.exit_time).strftime("%H:%M:%S")
-                    tableData.append((str(ticket.id), str(ticket.plate), str(entryTime), str(exitTime), str(ticket.fee)))
+        htmlDF = df.drop(columns=['paid'])
+        htmlDF['entry_time'] = df['entry_time'].map(lambda x: x.strftime("%H:%M:%S"))
+        htmlDF['exit_time'] = df['exit_time'].map(lambda x: x.strftime("%H:%M:%S"))
+        htmlDF = htmlDF.loc[checkSameDateVect(df['entry_time'], form.date.data)]
 
-        return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData, form=form, numCars = carsInside)
+        return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside)
 
-    return render_template('viewReport.html', title = 'View Reports', headings=[], tableData=[], form=form, numCars = carsInside)
+    
+
+    return render_template('viewReport.html', title = 'View Reports', tables=[], titles=[], form=form, numCars = carsInside)
+    # return render_template('viewReport.html', title = 'View Reports', headings=[], tableData=[], form=form, numCars = carsInside)
 
 
 @app.route('/mTryAgain', methods = ['GET', 'POST'])
