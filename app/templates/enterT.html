@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 
 {% block head %}
-	<h2>Sorry, that ticket has already been paid, or it does not exist.</h2>
-	<h3>Please try again</h3>
+	<h1>Exit the Car Park</h1>
+	<h7>Please enter your ticket number</h7>
 {% endblock %}
 
 {% block body %}
-
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }}
+        <p>
+            {{ form.ticketNumber.label }}<br>
+            {{ form.ticketNumber(size=32) }}
+        </p>
         <p>{{ form.submit() }}</p>
     </form>
 {% endblock %}
