@@ -1,7 +1,6 @@
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
-from datetime import datetime
 import time
 import math
 from app import database
@@ -21,8 +20,6 @@ def ticketsUpdate(curNP, startTime):
 class DataHandler:
     def __init__(self):
         self.customerNP = None # str
-        self.timePeriod = None # int
-        self.startTime = None # int
         self.totalTime = None # int
         self.happyHour = False # boolean
         self.curTicket = None
@@ -69,12 +66,6 @@ class DataHandler:
 
         return price * self.getDiscount()
 
-    def startTimer(self):
-        self.startTime = time.time()
-
-    def endTimer(self):
-        self.totalTime = time.time() - self.startTime
-
     def calcTime(self):
         self.totalTime = self.curTicket.exit_time - self.curTicket.entry_time
 
@@ -102,17 +93,6 @@ def login():
             ticketsUpdate(form.customerNP.data, startTime)
             return redirect('/entry')
     return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form)
-
-
-@app.route('/timing', methods = ['GET', 'POST'])
-def timing():
-    if request.method == "POST":
-        formData = dict(request.form)
-        data.timePeriod = int(formData["timePeriod"])
-    form = enterTime()
-    if form.validate_on_submit():
-        return redirect('/payment')
-    return render_template('enterTime.html', title = 'How long are you staying?', form=form)
 
 @app.route('/entry', methods = ['GET', 'POST'])
 def entry():
