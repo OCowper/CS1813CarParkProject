@@ -204,6 +204,7 @@ def viewReport():
     # use paid to check if to include that row
     return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData)
 @app.route('/mTryAgain', methods = ['GET', 'POST'])
+
 def mTryAgain():
     form = returnB()
     if form.validate_on_submit():
