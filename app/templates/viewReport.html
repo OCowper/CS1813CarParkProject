@@ -7,6 +7,13 @@
 
 {% block body %}
 
+<form action="" method="POST" novalidate>
+    {{ form.hidden_tag() }}
+    {{ form.date }}
+    {{ form.submit() }}
+</form>
+
+
 <table>
     <tr>
         {% for header in headings %}

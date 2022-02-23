@@ -187,25 +187,43 @@ def tryAgain():
     return render_template('tryAgain.html', title = 'Please Try Again', form = form)
 
 
-@app.route('/viewreport', methods=['GET'])
+@app.route('/viewreport', methods=['GET', 'POST'])
 def viewReport():
     allCars = database.Tickets.query.order_by(database.Tickets.id)
     carsInside = 0
     for car in allCars:
         if car.paid == False:
             carsInside = carsInside + 1
-    headings = ("ID", "Plate", "Entry Time", "Exit Time", "Fee")
+
+
     tableDataRaw = database.Tickets.query.order_by(database.Tickets.id).all()
-    tableData = []
+    form = dateSelect()
+    dates = []
     for ticket in tableDataRaw:
         if ticket.paid:
-            entryTime = datetime.fromtimestamp(ticket.entry_time).strftime("%Y-%m-%d %H:%M:%S")
-            exitTime = datetime.fromtimestamp(ticket.exit_time).strftime("%Y-%m-%d %H:%M:%S")
-            tableData.append((str(ticket.id), str(ticket.plate), str(entryTime), str(exitTime), str(ticket.fee)))
+            entryDate = datetime.fromtimestamp(ticket.entry_time).date()
+            if entryDate not in dates:
+                dates.append(entryDate)
 
-    # tableData = ((id, plate, entry_time, exit_time, fee))
-    # use paid to check if to include that row
-    return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData, numCars = carsInside)
+    form.date.choices = [(i.strftime("%Y-%m-%d"), i.strftime("%Y-%m-%d")) for i in dates]
+        
+    if request.method == 'POST':
+        headings = ("ID", "Plate", "Entry Time", "Exit Time", "Fee")
+        tableData = []
+        for ticket in tableDataRaw:
+            if ticket.paid:
+                entryDate = datetime.fromtimestamp(ticket.entry_time).date()
+                if entryDate.strftime("%Y-%m-%d") == form.date.data:
+                    entryTime = datetime.fromtimestamp(ticket.entry_time).strftime("%Y-%m-%d %H:%M:%S")
+                    exitTime = datetime.fromtimestamp(ticket.exit_time).strftime("%Y-%m-%d %H:%M:%S")
+                    tableData.append((str(ticket.id), str(ticket.plate), str(entryTime), str(exitTime), str(ticket.fee)))
+
+        return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData, form=form, numCars = carsInside)
+        # tableData = ((id, plate, entry_time, exit_time, fee))
+        # use paid to check if to include that row
+
+    return render_template('viewReport.html', title = 'View Reports', headings=[], tableData=[], form=form, numCars = carsInside)
+
 
 @app.route('/mTryAgain', methods = ['GET', 'POST'])
 
