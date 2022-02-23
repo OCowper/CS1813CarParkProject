@@ -1,10 +1,15 @@
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
-from datetime import datetime
+from app import database
+from datetime import datetime, timedelta
+
+import pandas as pd
+import numpy as np
+import sqlite3
+import os
 import time
 import math
-from app import database
 
 def ticketsUpdate(curNP, startTime):
     curTickets = database.Tickets.query.order_by(database.Tickets.id)
@@ -168,25 +173,83 @@ def tryAgain():
     return render_template('tryAgain.html', title = 'Please Try Again', form = form)
 
 
-@app.route('/viewreport', methods=['GET'])
+
+def timestampToDate(x):
+    return datetime.fromtimestamp(x).date()
+
+def timestampToDateTime(x):
+    return datetime.fromtimestamp(x)
+
+def checkSameDate(datetime64Obj, dateString):
+    timestamp = pd.to_datetime(datetime64Obj)
+    return timestamp.strftime("%Y-%m-%d") == dateString
+
+def checkTimePeriod(timeToCheck, startHour, endHour):
+    timestamp = pd.to_datetime(timeToCheck)
+    timestampDate = timestamp.strftime("%Y-%m-%d")
+    dateTimeObj = datetime.strptime(timestamp.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
+    startHourTime = datetime.strptime(f"{timestampDate} {startHour}", "%Y-%m-%d %H:%M")
+    if endHour == "00:00":
+        day = datetime.strptime(timestampDate, "%Y-%m-%d")
+        day += timedelta(days=1)
+        timestampDate = day.strftime("%Y-%m-%d")
+
+    endHourTime = datetime.strptime(f"{timestampDate} {endHour}", "%Y-%m-%d %H:%M")
+    return startHourTime <= dateTimeObj <= endHourTime
+
+
+checkSameDateVect = np.vectorize(checkSameDate)
+checkTimePeriodVect = np.vectorize(checkTimePeriod)
+
+@app.route('/viewreport', methods=['GET', 'POST'])
 def viewReport():
     allCars = database.Tickets.query.order_by(database.Tickets.id)
     carsInside = 0
     for car in allCars:
         if car.paid == False:
             carsInside = carsInside + 1
-    headings = ("ID", "Plate", "Entry Time", "Exit Time", "Fee")
+
+
     tableDataRaw = database.Tickets.query.order_by(database.Tickets.id).all()
-    tableData = []
+    form = dateSelect()
+    dates = []
     for ticket in tableDataRaw:
         if ticket.paid:
-            entryTime = datetime.fromtimestamp(ticket.entry_time).strftime("%Y-%m-%d %H:%M:%S")
-            exitTime = datetime.fromtimestamp(ticket.exit_time).strftime("%Y-%m-%d %H:%M:%S")
-            tableData.append((str(ticket.id), str(ticket.plate), str(entryTime), str(exitTime), str(ticket.fee)))
+            entryDate = datetime.fromtimestamp(ticket.entry_time).date()
+            if entryDate not in dates:
+                dates.append(entryDate)
 
-    # tableData = ((id, plate, entry_time, exit_time, fee))
-    # use paid to check if to include that row
-    return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData, numCars = carsInside)
+    form.date.choices = [(i.strftime("%Y-%m-%d"), i.strftime("%Y-%m-%d")) for i in dates]
+
+    for i in range(24):
+        timeString = f"{i:02}:00"
+        form.starthour.choices.append((timeString, timeString))
+        form.endhour.choices.append((timeString, timeString))
+
+    con = sqlite3.connect(os.path.join("app", "database.db"))
+    df = pd.read_sql_query("SELECT * from tickets", con)
+    con.close()
+
+    df = df[df['paid'] == 1]
+    df['entry_time'] = df['entry_time'].map(timestampToDateTime)
+    df['exit_time'] = df['exit_time'].map(timestampToDateTime)
+
+    if request.method == 'POST':
+        df = df.loc[checkSameDateVect(df['entry_time'], form.date.data)]
+        df = df.loc[checkTimePeriodVect(df['entry_time'], form.starthour.data, form.endhour.data)]
+        htmlDF = df.drop(columns=['paid'])
+        htmlDF['entry_time'] = df['entry_time'].map(lambda x: x.strftime("%H:%M:%S"))
+        htmlDF['exit_time'] = df['exit_time'].map(lambda x: x.strftime("%H:%M:%S"))
+        htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
+         "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
+
+
+        return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside)
+
+    
+
+    return render_template('viewReport.html', title = 'View Reports', tables=[], titles=[], form=form, numCars = carsInside)
+
 
 @app.route('/mTryAgain', methods = ['GET', 'POST'])
 
