@@ -38,7 +38,7 @@ class DataHandler:
         return self.happyHour
         
     def getDiscount(self):
-        curCustomer = database.Customer.query.filter_by(plate = self.customerNP).first()
+        curCustomer = database.SpecialCustomer.query.filter_by(plate = self.customerNP).first()
         if curCustomer != None:
             if curCustomer.local_authority == True or self.happyHour == True:
                 return 0

@@ -16,14 +16,13 @@ class Tickets(db.Model):
     def __repr__(self):
         return "ID {}, License Plate {}, Entry Time {}".format(self.id, self.plate, self.entry_time)
 
-class Customer(db.Model):
+class SpecialCustomer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     plate = db.Column(db.String(MAX_PLATE_LENGTH), nullable=False)
     first_name = db.Column(db.String(MAX_NAME_LENGTH), nullable=False)
     surname = db.Column(db.String(MAX_NAME_LENGTH), nullable=False)
     local_authority = db.Column(db.Boolean, nullable=False)
     local_consultancy = db.Column(db.Boolean, nullable=False)
-    employee = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
         return "License Plate {}, First Name {}, Surname {}, Local Authority {}, Local Consultancy {}".format(self.plate, self.first_name, self.surname, self.local_authority, self.local_consultancy)
