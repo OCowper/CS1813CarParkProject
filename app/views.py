@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
+from datetime import datetime
 import time
 import math
 from app import database
@@ -185,7 +186,25 @@ def tryAgain():
         return redirect('/signOut')
     return render_template('tryAgain.html', title = 'Please Try Again', form = form)
 
+
+@app.route('/viewreport', methods=['GET'])
+def viewReport():
+    headings = ("ID", "Plate", "Entry Time", "Exit Time", "Fee")
+    tableDataRaw = database.Tickets.query.order_by(database.Tickets.id).all()
+    print(tableDataRaw)
+    tableData = []
+    for ticket in tableDataRaw:
+        if ticket.paid:
+            entryTime = datetime.fromtimestamp(ticket.entry_time).strftime("%Y-%m-%d %H:%M:%S")
+            exitTime = datetime.fromtimestamp(ticket.exit_time).strftime("%Y-%m-%d %H:%M:%S")
+            tableData.append((str(ticket.id), str(ticket.plate), str(entryTime), str(exitTime), str(ticket.fee)))
+
+    print(tableData)
+    # tableData = ((id, plate, entry_time, exit_time, fee))
+    # use paid to check if to include that row
+    return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData)
 @app.route('/mTryAgain', methods = ['GET', 'POST'])
+
 def mTryAgain():
     form = returnB()
     if form.validate_on_submit():
