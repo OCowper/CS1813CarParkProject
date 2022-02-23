@@ -25,6 +25,13 @@ class DataHandler:
         self.totalTime = None # int
         self.happyHour = False # boolean
         self.curTicket = None
+        self.curTID = None
+
+    def setCurTID(self, curTID):
+        self.curTID = curTID
+
+    def getCurTID(self):
+        return self.curTID
 
     def setCustomerNP(self, customerNP):
         self.customerNP = customerNP
@@ -117,7 +124,9 @@ def entry():
 def signOut():
     form = enterTicket()
     if form.validate_on_submit():
-        curTicket = database.Tickets.query.filter_by(id = form.ticketNumber.data).first()
+        curID = form.ticketNumber.data
+        curTicket = database.Tickets.query.filter_by(id = curID).first()
+        data.setCurTID(curID)
         if curTicket != None:
             if curTicket.paid == False:
                 curTicket.exit_time = time.time()
@@ -135,6 +144,10 @@ def signOut():
 def payment():
     form = paymentForm()
     if form.validate_on_submit():
+        curID = data.getCurTID()
+        curTicket = database.Tickets.query.filter_by(id = curID).first()
+        curTicket.fee = data.calculatePrice()
+        database.db.session.commit()
         return redirect('/index')
     if data.getHappyHour():
         return render_template('enterPaymentHappy.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
