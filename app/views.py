@@ -131,7 +131,6 @@ def signOut():
         if curTicket != None:
             if curTicket.paid == False:
                 curTicket.exit_time = time.time()
-                curTicket.paid = True
                 database.db.session.commit()
                 data.setCurTicket(curTicket)
                 data.calcTime()
@@ -148,6 +147,7 @@ def payment():
         curID = data.getCurTID()
         curTicket = database.Tickets.query.filter_by(id = curID).first()
         curTicket.fee = data.calculatePrice()
+        curTicket.paid = True
         database.db.session.commit()
         return redirect('/index')
     if data.getHappyHour():
@@ -159,8 +159,13 @@ def payment():
 def mLogin():
     form = mLoginForm()
     if form.validate_on_submit():
-        
-        return redirect('/mView')
+        curUsername = form.username.data
+        curLogin = database.ManagerLogin.query.filter_by(username = curUsername).first()
+        if curLogin != None:
+            if curLogin.password == form.password.data:
+                return redirect('/mView')
+            return redirect('/mTryAgain')
+        return redirect('/mTryAgain')
     return render_template('mLogin.html', title = 'Manager Sign In', form = form)
 
 @app.route('/mView', methods = ['GET', 'POST'])
@@ -198,3 +203,9 @@ def viewReport():
     # tableData = ((id, plate, entry_time, exit_time, fee))
     # use paid to check if to include that row
     return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData)
+@app.route('/mTryAgain', methods = ['GET', 'POST'])
+def mTryAgain():
+    form = returnB()
+    if form.validate_on_submit():
+        return redirect('/mLogin')
+    return render_template('mTryAgain.html', title = 'Please Try Again', form = form)
