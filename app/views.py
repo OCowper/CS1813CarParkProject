@@ -158,9 +158,13 @@ def payment():
 def mLogin():
     form = mLoginForm()
     if form.validate_on_submit():
-        #curLogin = database.ManagerLogin.query.filter_by(
-        
-        return redirect('/mView')
+        curUsername = form.username.data
+        curLogin = database.ManagerLogin.query.filter_by(username = curUsername).first()
+        if curLogin != None:
+            if curLogin.password == form.password.data:
+                return redirect('/mView')
+            return redirect('/mTryAgain')
+        return redirect('/mTryAgain')
     return render_template('mLogin.html', title = 'Manager Sign In', form = form)
 
 @app.route('/mView', methods = ['GET', 'POST'])
@@ -180,3 +184,10 @@ def tryAgain():
     if form.validate_on_submit():
         return redirect('/signOut')
     return render_template('tryAgain.html', title = 'Please Try Again', form = form)
+
+@app.route('/mTryAgain', methods = ['GET', 'POST'])
+def mTryAgain():
+    form = returnB()
+    if form.validate_on_submit():
+        return redirect('/mLogin')
+    return render_template('mTryAgain.html', title = 'Please Try Again', form = form)
