@@ -8,7 +8,7 @@ import os
 import time
 import math
 from app import database
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def ticketsUpdate(curNP, startTime):
     curTickets = database.Tickets.query.order_by(database.Tickets.id)
@@ -183,7 +183,22 @@ def checkSameDate(datetime64Obj, dateString):
     timestamp = pd.to_datetime(datetime64Obj)
     return timestamp.strftime("%Y-%m-%d") == dateString
 
+def checkTimePeriod(timeToCheck, startHour, endHour):
+    timestamp = pd.to_datetime(timeToCheck)
+    timestampDate = timestamp.strftime("%Y-%m-%d")
+    dateTimeObj = datetime.strptime(timestamp.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
+    startHourTime = datetime.strptime(f"{timestampDate} {startHour}", "%Y-%m-%d %H:%M")
+    if endHour == "00:00":
+        day = datetime.strptime(timestampDate, "%Y-%m-%d")
+        day += timedelta(days=1)
+        timestampDate = day.strftime("%Y-%m-%d")
+
+    endHourTime = datetime.strptime(f"{timestampDate} {endHour}", "%Y-%m-%d %H:%M")
+    return startHourTime <= dateTimeObj <= endHourTime
+
+
 checkSameDateVect = np.vectorize(checkSameDate)
+checkTimePeriodVect = np.vectorize(checkTimePeriod)
 
 @app.route('/viewreport', methods=['GET', 'POST'])
 def viewReport():
@@ -205,27 +220,34 @@ def viewReport():
 
     form.date.choices = [(i.strftime("%Y-%m-%d"), i.strftime("%Y-%m-%d")) for i in dates]
 
+    for i in range(24):
+        timeString = f"{i:02}:00"
+        form.starthour.choices.append((timeString, timeString))
+        form.endhour.choices.append((timeString, timeString))
+
     con = sqlite3.connect(os.path.join("app", "database.db"))
     df = pd.read_sql_query("SELECT * from tickets", con)
     con.close()
 
-    # df = df.reset_index(drop=True)
     df = df[df['paid'] == 1]
     df['entry_time'] = df['entry_time'].map(timestampToDateTime)
     df['exit_time'] = df['exit_time'].map(timestampToDateTime)
 
     if request.method == 'POST':
+        df = df.loc[checkSameDateVect(df['entry_time'], form.date.data)]
+        df = df.loc[checkTimePeriodVect(df['entry_time'], form.starthour.data, form.endhour.data)]
         htmlDF = df.drop(columns=['paid'])
         htmlDF['entry_time'] = df['entry_time'].map(lambda x: x.strftime("%H:%M:%S"))
         htmlDF['exit_time'] = df['exit_time'].map(lambda x: x.strftime("%H:%M:%S"))
-        htmlDF = htmlDF.loc[checkSameDateVect(df['entry_time'], form.date.data)]
+        htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
+         "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
+
 
         return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside)
 
     
 
     return render_template('viewReport.html', title = 'View Reports', tables=[], titles=[], form=form, numCars = carsInside)
-    # return render_template('viewReport.html', title = 'View Reports', headings=[], tableData=[], form=form, numCars = carsInside)
 
 
 @app.route('/mTryAgain', methods = ['GET', 'POST'])

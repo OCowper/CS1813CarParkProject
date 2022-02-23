@@ -39,4 +39,6 @@ class endHappy(FlaskForm):
     
 class dateSelect(FlaskForm):
     date = SelectField('Date: ', choices=[])
+    starthour = SelectField('Start Hour: ', choices=[])
+    endhour = SelectField('End Hour: ', choices=[])
     submit = SubmitField()

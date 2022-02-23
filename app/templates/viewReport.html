@@ -8,8 +8,12 @@
 {% block body %}
 
 <form action="" method="POST" novalidate>
-    {{ form.hidden_tag() }}
+    {{ form.date.label }}
     {{ form.date }}
+    {{ form.starthour.label }}
+    {{ form.starthour }}
+    {{ form.endhour.label }}
+    {{ form.endhour }}
     {{ form.submit() }}
 </form>
 
