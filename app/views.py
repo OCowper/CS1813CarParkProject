@@ -130,7 +130,6 @@ def signOut():
         if curTicket != None:
             if curTicket.paid == False:
                 curTicket.exit_time = time.time()
-                curTicket.paid = True
                 database.db.session.commit()
                 data.setCurTicket(curTicket)
                 data.calcTime()
@@ -147,6 +146,7 @@ def payment():
         curID = data.getCurTID()
         curTicket = database.Tickets.query.filter_by(id = curID).first()
         curTicket.fee = data.calculatePrice()
+        curTicket.paid = True
         database.db.session.commit()
         return redirect('/index')
     if data.getHappyHour():
@@ -158,6 +158,7 @@ def payment():
 def mLogin():
     form = mLoginForm()
     if form.validate_on_submit():
+        #curLogin = database.ManagerLogin.query.filter_by(
         
         return redirect('/mView')
     return render_template('mLogin.html', title = 'Manager Sign In', form = form)
