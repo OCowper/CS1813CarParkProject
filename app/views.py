@@ -189,6 +189,11 @@ def tryAgain():
 
 @app.route('/viewreport', methods=['GET'])
 def viewReport():
+    allCars = database.Tickets.query.order_by(database.Tickets.id)
+    carsInside = 0
+    for car in allCars:
+        if car.paid == False:
+            carsInside = carsInside + 1
     headings = ("ID", "Plate", "Entry Time", "Exit Time", "Fee")
     tableDataRaw = database.Tickets.query.order_by(database.Tickets.id).all()
     print(tableDataRaw)
@@ -202,7 +207,8 @@ def viewReport():
     print(tableData)
     # tableData = ((id, plate, entry_time, exit_time, fee))
     # use paid to check if to include that row
-    return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData)
+    return render_template('viewReport.html', title = 'View Reports', headings=headings, tableData=tableData, numCars = carsInside)
+
 @app.route('/mTryAgain', methods = ['GET', 'POST'])
 
 def mTryAgain():
