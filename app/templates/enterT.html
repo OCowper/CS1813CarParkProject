@@ -11,6 +11,9 @@
         <p>
             {{ form.ticketNumber.label }}<br>
             {{ form.ticketNumber(size=32) }}
+	    {% for error in form.ticketNumber.errors %}
+	    <span style="color: red;">[{{ error }}]</span.
+	    {% endfor%}
         </p>
         <p>{{ form.submit() }}</p>
     </form>

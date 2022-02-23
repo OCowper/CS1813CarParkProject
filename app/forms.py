@@ -19,7 +19,7 @@ class entryButton(FlaskForm):
     submit = SubmitField('Enter the Car Park')
 
 class enterTicket(FlaskForm):
-    ticketNumber = IntegerField('Ticket Number')
+    ticketNumber = IntegerField('Ticket Number', validators = [DataRequired()])
     submit = SubmitField('Next')
 
 class returnB(FlaskForm):
