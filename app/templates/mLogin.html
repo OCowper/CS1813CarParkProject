@@ -1,22 +1,20 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <h1>Sign In</h1>
 {% endblock %}
 
 {% block body %}
-    <form action="" method="post" novalidate>
+    <form class ="manager_box" action="" method="post" novalidate>
+        <h1>Sign In</h1>
         {{ form.hidden_tag() }}
-        <p>
             {{ form.username.label }}<br>
-            {{ form.username(size=32) }}
+            {{ form.username(size=32, placeholder="username") }}
             {% for error in form.username.errors %}
 	    <span style="color: red;">[{{ error }}]</span>
 	    {% endfor %}
-        </p>
         <p>
-            {{ form.password.label }}<br>
-            {{ form.password(size=32) }}
+            {{ form.password.label }}
+            {{ form.password(size=32, placeholder="password") }}
 	    {% for error in form.password.errors %}
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}

@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block head %}
-	<h1>Sign In</h1>
-	<h7> Enter your numberplate </h7>
+
 {% endblock %}
 
 {% block body %}
-    <form action="" method="post" novalidate>
+    <form class ="box" action="" method="post" novalidate>
+			<h7> Enter your numberplate </h7>
         {{ form.hidden_tag() }}
         <p>
             {{ form.customerNP.label }}<br>
-            {{ form.customerNP(size=32) }}
+            {{ form.customerNP(size=20, placeholder="numberplate") }}
         </p>
         <p>{{ form.submit() }}</p>
     </form>
