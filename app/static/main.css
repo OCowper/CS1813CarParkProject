@@ -51,6 +51,7 @@ body {
     background: #2c3e50;
 }
 
+<<<<<<< HEAD
 .box{
     width:300px;
     padding: 40px;
@@ -158,4 +159,23 @@ body {
 
 .manager_box input[type="submit"]:hover{
     background: #2ecc71;
+=======
+.dataframe {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.dataframe tr:nth-child(even){background-color: #f2f2f2;}
+.dataframe tr:nth-child(odd){background-color: #ffffff;}
+
+.dataframe tr:hover {background-color: #ddd;}
+
+.dataframe th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #2980b9;
+  color: white;
+>>>>>>> 3d27e7dffb71872102b307a08dfd15c423bc3f68
 }

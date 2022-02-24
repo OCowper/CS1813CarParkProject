@@ -7,19 +7,21 @@
 
 {% block body %}
 
-<table>
-    <tr>
-        {% for header in headings %}
-        <th>{{ header }}</th>
-        {% endfor %}
-    </tr>
-    {% for row in tableData %}
-    <tr>
-        {% for cell in row %}
-        <td>{{ cell }}</td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
-</table>
+<form action="" method="POST" novalidate>
+    {{ form.date.label }}
+    {{ form.date }}
+    {{ form.starthour.label }}
+    {{ form.starthour }}
+    {{ form.endhour.label }}
+    {{ form.endhour }}
+    {{ form.submit() }}
+</form>
+
+{% for table in tables %}
+
+{{titles[loop.index]}}
+{{ table|safe }}
+
+{% endfor %}
 
 {% endblock %}

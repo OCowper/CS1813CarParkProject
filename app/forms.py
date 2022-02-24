@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, IntegerField
+from wtforms import StringField, SubmitField, PasswordField, IntegerField, SelectField
 from wtforms.validators import DataRequired
 
 
@@ -42,3 +42,13 @@ class startHappy(FlaskForm):
 
 class endHappy(FlaskForm):
     happyHourToggle = SubmitField('End Happy Hour')
+<<<<<<< HEAD
+=======
+
+    
+class dateSelect(FlaskForm):
+    date = SelectField('Date: ', choices=[])
+    starthour = SelectField('Start Hour: ', choices=[])
+    endhour = SelectField('End Hour: ', choices=[])
+    submit = SubmitField()
+>>>>>>> 3d27e7dffb71872102b307a08dfd15c423bc3f68
