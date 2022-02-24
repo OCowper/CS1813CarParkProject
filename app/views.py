@@ -4,6 +4,7 @@ from app.forms import *
 from app import database
 from datetime import datetime, timedelta
 
+import json
 import plotly
 import plotly.express as px
 import pandas as pd
@@ -32,6 +33,7 @@ class DataHandler:
         self.happyHour = False # boolean
         self.curTicket = None
         self.curTID = None
+        self.df = None
 
     def setCurTID(self, curTID):
         self.curTID = curTID
@@ -199,13 +201,21 @@ def checkTimePeriod(timeToCheck, startHour, endHour):
     endHourTime = datetime.strptime(f"{timestampDate} {endHour}", "%Y-%m-%d %H:%M:%S")
     return startHourTime <= dateTimeObj <= endHourTime
 
-# def countCarsParked(df, time, startHour):
-#     entries = df.loc[checkTimePeriodVect(df['entry_time'], startHour, time), ['entry_time']]
-#     print(entries)
+
+def countEntries(time, startHour):
+    return len(data.df.loc[checkTimePeriodVect(data.df['entry_time'], startHour, time), ['entry_time']])
+
+def countExits(time, startHour):
+    return len(data.df.loc[checkTimePeriodVect(data.df['exit_time'], startHour, time), ['exit_time']])
+
+def countCarsParked(time, startHour):
+    return countEntries(time, startHour) - countExits(time, startHour)
 
 checkSameDateVect = np.vectorize(checkSameDate)
 checkTimePeriodVect = np.vectorize(checkTimePeriod)
-# countCarsParkedVect = np.vectorize(countCarsParked)
+countEntriesVect = np.vectorize(countEntries)
+countExitsVect = np.vectorize(countExits)
+countCarsParkedVect = np.vectorize(countCarsParked)
 
 @app.route('/viewreport', methods=['GET', 'POST'])
 def viewReport():
@@ -239,23 +249,41 @@ def viewReport():
     df = df[df['paid'] == 1]
     df['entry_time'] = df['entry_time'].map(timestampToDateTime)
     df['exit_time'] = df['exit_time'].map(timestampToDateTime)
-
     if request.method == 'POST':
         df = df.loc[checkSameDateVect(df['entry_time'], form.date.data)]
         df = df.loc[checkTimePeriodVect(df['entry_time'], form.starthour.data, form.endhour.data)]
+        data.df = df
+
         htmlDF = df.drop(columns=['paid'])
         htmlDF['entry_time'] = df['entry_time'].map(lambda x: x.strftime("%H:%M:%S"))
         htmlDF['exit_time'] = df['exit_time'].map(lambda x: x.strftime("%H:%M:%S"))
+        # # test = 22:36:01 on 22-02-2022
+
+        graphJSON = None
+        if len(htmlDF['entry_time']) > 0:
+            numParkedArray = countCarsParkedVect(htmlDF['entry_time'], form.starthour.data)
+            numEntriesArray = countEntriesVect(htmlDF['entry_time'], form.starthour.data)
+            numExitsArray = countExitsVect(htmlDF['entry_time'], form.starthour.data)
+            parkedCarsDF = pd.DataFrame({"Time": htmlDF['entry_time'], "No. cars parked": numParkedArray, "No. entries": numEntriesArray,
+            "No. exits": numExitsArray})
+
+
+            #sort out time types
+            #change time axes tick
+            #finish graph user stories
+
+            parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title="Car Park Report")#, template="plotly_dark")
+
+
+            graphJSON = json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
+
         htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
          "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
 
-        # # test = 22:36:01 on 22-02-2022
-        # countCarsParked(df, "22:36:01")
 
-        return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside)
+        return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside, graphJSON=graphJSON)
 
     
-
     return render_template('viewReport.html', title = 'View Reports', tables=[], titles=[], form=form, numCars = carsInside)
 
 
