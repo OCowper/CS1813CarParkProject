@@ -158,13 +158,13 @@ body {
 
 .manager_box input[type="submit"]:hover{
     background: #2ecc71;
-<<<<<<< HEAD
-}
-=======
 
 }
 
->>>>>>> f184e2a573fac633fff10e4f3f148e9020d2b7b3
+
+}
+
+
 .dataframe {
     font-family: Arial, Helvetica, sans-serif;
     border-collapse: collapse;
