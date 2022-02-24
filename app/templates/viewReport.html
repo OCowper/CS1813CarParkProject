@@ -24,4 +24,14 @@
 
 {% endfor %}
 
+{% if graphJSON %}
+<div id="graph"></div>
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  graph = document.getElementById('graph');
+  var graphs = {{ graphJSON | safe }};
+  Plotly.newPlot(graph,graphs,{});
+</script>
+{% endif %}
+
 {% endblock %}

@@ -4,6 +4,9 @@ from app.forms import *
 from app import database
 from datetime import datetime, timedelta
 
+import json
+import plotly
+import plotly.express as px
 import pandas as pd
 import numpy as np
 import sqlite3
@@ -173,30 +176,37 @@ def tryAgain():
     return render_template('tryAgain.html', title = 'Please Try Again', form = form)
 
 
+def timestampToDateString(x):
+    return datetime.fromtimestamp(x).strftime("%Y-%m-%d")
 
-def timestampToDate(x):
-    return datetime.fromtimestamp(x).date()
+def timestampToTimeString(x):
+    return datetime.fromtimestamp(x).strftime("%H:%M:%S")
 
 def timestampToDateTime(x):
     return datetime.fromtimestamp(x)
 
-def checkSameDate(datetime64Obj, dateString):
-    timestamp = pd.to_datetime(datetime64Obj)
-    return timestamp.strftime("%Y-%m-%d") == dateString
+def checkSameDate(timestamp, dateString):
+    return timestampToDateString(timestamp) == dateString
 
 def checkTimePeriod(timeToCheck, startHour, endHour):
-    timestamp = pd.to_datetime(timeToCheck)
-    timestampDate = timestamp.strftime("%Y-%m-%d")
-    dateTimeObj = datetime.strptime(timestamp.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
-    startHourTime = datetime.strptime(f"{timestampDate} {startHour}", "%Y-%m-%d %H:%M")
-    if endHour == "00:00":
-        day = datetime.strptime(timestampDate, "%Y-%m-%d")
-        day += timedelta(days=1)
-        timestampDate = day.strftime("%Y-%m-%d")
+    startHourTime = datetime.strptime(f"{timestampToDateString(timeToCheck)} {startHour}", "%Y-%m-%d %H:%M:%S")
+    endHourTime = datetime.strptime(f"{timestampToDateString(timeToCheck)} {endHour}", "%Y-%m-%d %H:%M:%S")
+    if endHour == "00:00:00":
+        endHourTime += timedelta(days=1)
 
-    endHourTime = datetime.strptime(f"{timestampDate} {endHour}", "%Y-%m-%d %H:%M")
-    return startHourTime <= dateTimeObj <= endHourTime
+    timeToCheckDateTime = timestampToDateTime(timeToCheck).replace(microsecond=0) # truncate milliseconds
 
+    return startHourTime <= timeToCheckDateTime <= endHourTime
+
+def countTimes(column, start, end):
+    return len(column[checkTimePeriodVect(column, start, end)])
+
+
+def convertToCurrency(x):
+    if x != None:
+        return "£{:,.2f}".format(int(x))
+
+    return None
 
 checkSameDateVect = np.vectorize(checkSameDate)
 checkTimePeriodVect = np.vectorize(checkTimePeriod)
@@ -210,19 +220,10 @@ def viewReport():
             carsInside = carsInside + 1
 
 
-    tableDataRaw = database.Tickets.query.order_by(database.Tickets.id).all()
     form = dateSelect()
-    dates = []
-    for ticket in tableDataRaw:
-        if ticket.paid:
-            entryDate = datetime.fromtimestamp(ticket.entry_time).date()
-            if entryDate not in dates:
-                dates.append(entryDate)
-
-    form.date.choices = [(i.strftime("%Y-%m-%d"), i.strftime("%Y-%m-%d")) for i in dates]
-
+    
     for i in range(24):
-        timeString = f"{i:02}:00"
+        timeString = f"{i:02}:00:00"
         form.starthour.choices.append((timeString, timeString))
         form.endhour.choices.append((timeString, timeString))
 
@@ -230,24 +231,45 @@ def viewReport():
     df = pd.read_sql_query("SELECT * from tickets", con)
     con.close()
 
-    df = df[df['paid'] == 1]
-    df['entry_time'] = df['entry_time'].map(timestampToDateTime)
-    df['exit_time'] = df['exit_time'].map(timestampToDateTime)
+    dates = list(set(df['entry_time'].map(timestampToDateString).to_list()))
+    dates = sorted(dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
+    form.date.choices = [(i, i) for i in dates]
 
+    df = df[df['paid'] == 1]
+
+    
     if request.method == 'POST':
         df = df.loc[checkSameDateVect(df['entry_time'], form.date.data)]
         df = df.loc[checkTimePeriodVect(df['entry_time'], form.starthour.data, form.endhour.data)]
+
         htmlDF = df.drop(columns=['paid'])
-        htmlDF['entry_time'] = df['entry_time'].map(lambda x: x.strftime("%H:%M:%S"))
-        htmlDF['exit_time'] = df['exit_time'].map(lambda x: x.strftime("%H:%M:%S"))
+        htmlDF['entry_time'] = df['entry_time'].map(timestampToTimeString)
+        htmlDF['exit_time'] = df['exit_time'].map(timestampToTimeString)
+
+        graphJSON = None
+        if len(htmlDF['entry_time']) > 0: # Drawing Graph
+            numEntries = htmlDF['entry_time'].map(lambda x: countTimes(df['entry_time'], form.starthour.data, x))
+            numExits = htmlDF['entry_time'].map(lambda x: countTimes(df['exit_time'], form.starthour.data, x))
+            numParked = numEntries - numExits
+
+            parkedCarsDF = pd.DataFrame({"Time": htmlDF['entry_time'], "No. cars parked": numParked, "No. entries": numEntries,
+            "No. exits": numExits})
+
+            #finish graph user stories
+
+            parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title="Car Park Report")#, template="plotly_dark")
+
+
+            graphJSON = json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
+
+        # Make table look nice for HTML
         htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
          "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
+        
+        htmlDF['Fee'] = htmlDF['Fee'].map(convertToCurrency)
 
-
-        return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside)
-
+        return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside, graphJSON=graphJSON)
     
-
     return render_template('viewReport.html', title = 'View Reports', tables=[], titles=[], form=form, numCars = carsInside)
 
 
