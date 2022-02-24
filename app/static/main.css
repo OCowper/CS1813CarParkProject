@@ -50,3 +50,112 @@ body {
     font-family: sans-serif;
     background: #2c3e50;
 }
+
+.box{
+    width:300px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+}
+
+.box h7{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+.box input[type="text"] {
+    border: 0
+    background: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.2s;
+    border: 2px solid #3498db;
+    outline: 0;
+}
+
+.box input[type="text"]:focus{
+    width: 225px;
+    border-color: #2ecc71;
+}
+
+.box input[type="submit"]{
+    border: 0
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid #2ecc71;
+    outline: 0;
+}
+
+.box input[type="submit"]:hover{
+    background: #2ecc71;
+}
+
+.manager_box{
+    width:360px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+}
+
+.manager_box h1{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+.manager_box input[type="text"], .manager_box input[type = "password"] {
+    border: 0
+    background: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.2s;
+    border: 2px solid #3498db;
+    outline: 0;
+}
+
+.manager_box input[type="text"]:focus, .manager_box input[type="password"]:focus{
+    width: 225px;
+    border-color: #2ecc71;
+}
+
+
+.manager_box input[type="submit"]{
+    border: 0
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid #2ecc71;
+    outline: 0;
+}
+
+.manager_box input[type="submit"]:hover{
+    background: #2ecc71;
+}

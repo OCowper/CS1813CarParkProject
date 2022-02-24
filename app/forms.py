@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired
 
 
 class enterCustNP(FlaskForm):
-    customerNP = StringField("Customer Number Plate")
+    customerNP = StringField("")
     submit = SubmitField('Enter the Car Park')
 
 
@@ -31,8 +31,8 @@ class returnB(FlaskForm):
 
 
 class mLoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('', validators=[DataRequired()])
+    password = PasswordField('', validators=[DataRequired()])
     submit = SubmitField('Sign In')
 
 
