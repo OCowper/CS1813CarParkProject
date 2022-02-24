@@ -4,6 +4,8 @@ from app.forms import *
 from app import database
 from datetime import datetime, timedelta
 
+import plotly
+import plotly.express as px
 import pandas as pd
 import numpy as np
 import sqlite3
@@ -188,18 +190,22 @@ def checkTimePeriod(timeToCheck, startHour, endHour):
     timestamp = pd.to_datetime(timeToCheck)
     timestampDate = timestamp.strftime("%Y-%m-%d")
     dateTimeObj = datetime.strptime(timestamp.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")
-    startHourTime = datetime.strptime(f"{timestampDate} {startHour}", "%Y-%m-%d %H:%M")
-    if endHour == "00:00":
+    startHourTime = datetime.strptime(f"{timestampDate} {startHour}", "%Y-%m-%d %H:%M:%S")
+    if endHour == "00:00:00":
         day = datetime.strptime(timestampDate, "%Y-%m-%d")
         day += timedelta(days=1)
         timestampDate = day.strftime("%Y-%m-%d")
 
-    endHourTime = datetime.strptime(f"{timestampDate} {endHour}", "%Y-%m-%d %H:%M")
+    endHourTime = datetime.strptime(f"{timestampDate} {endHour}", "%Y-%m-%d %H:%M:%S")
     return startHourTime <= dateTimeObj <= endHourTime
 
+# def countCarsParked(df, time, startHour):
+#     entries = df.loc[checkTimePeriodVect(df['entry_time'], startHour, time), ['entry_time']]
+#     print(entries)
 
 checkSameDateVect = np.vectorize(checkSameDate)
 checkTimePeriodVect = np.vectorize(checkTimePeriod)
+# countCarsParkedVect = np.vectorize(countCarsParked)
 
 @app.route('/viewreport', methods=['GET', 'POST'])
 def viewReport():
@@ -222,7 +228,7 @@ def viewReport():
     form.date.choices = [(i.strftime("%Y-%m-%d"), i.strftime("%Y-%m-%d")) for i in dates]
 
     for i in range(24):
-        timeString = f"{i:02}:00"
+        timeString = f"{i:02}:00:00"
         form.starthour.choices.append((timeString, timeString))
         form.endhour.choices.append((timeString, timeString))
 
@@ -243,6 +249,8 @@ def viewReport():
         htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
          "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
 
+        # # test = 22:36:01 on 22-02-2022
+        # countCarsParked(df, "22:36:01")
 
         return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside)
 
