@@ -238,6 +238,7 @@ def mView():
 @login_required
 def mLogout():
     logout_user()
+    flash("Logged out successfully!", category="success")
     return redirect('/index')
 
 
