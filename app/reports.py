@@ -44,7 +44,7 @@ def countTimes(column, start, end):
 
 def convertToCurrency(x):
     if x != None:
-        return "£{:,.2f}".format(int(x))
+        return "£{:,.2f}".format(float(x))
 
     return None
 
