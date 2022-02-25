@@ -44,18 +44,16 @@ class startHappy(FlaskForm):
 class endHappy(FlaskForm):
     happyHourToggle = SubmitField('End Happy Hour')
 
-<<<<<<< HEAD
+
 class setRecHappyHourForm(FlaskForm):
     start = TimeField('Start Time: ', format="%H:%M")
     end = TimeField('End Time: ', format="%H:%M")
     submit = SubmitField('Enter')
-    
-    
-=======
 
->>>>>>> csswork
+
 class dateSelect(FlaskForm):
-    startdate = DateField('Start Date: ', format="%Y-%m-%d") # rename to start date later
+    # rename to start date later
+    startdate = DateField('Start Date: ', format="%Y-%m-%d")
     enddate = DateField('End Date: ', format="%Y-%m-%d")
     startTime = TimeField('Start Time: ', format="%H:%M")
     endTime = TimeField('End Time: ', format="%H:%M")
