@@ -201,14 +201,21 @@ def viewReport():
         table = getHTML(df, str(form.startdate.data), str(form.enddate.data), 
         str(form.startTime.data), str(form.endTime.data))
 
-        graphJSON = lineGraphReport(df, str(form.startdate.data), 
-        str(form.startTime.data), str(form.endTime.data))
+        graphList = []
+
+        x = form.startdate.data
+
+        while (x <= form.enddate.data):
+            graphList.append(lineGraphReport(df, str(x), 
+            str(form.startTime.data), str(form.endTime.data)))
+
+            x += timedelta(days=1)
 
         return render_template('viewReport.html', title = 'View Reports', form=form, 
-        numCars = carsInside, graphJSON=graphJSON, table=table)
+        numCars = carsInside, graphList=graphList, table=table)
     
     return render_template('viewReport.html', title = 'View Reports', form=form, 
-    numCars = carsInside)
+    numCars = carsInside, graphList=[])
 
 
 @app.route('/mTryAgain', methods = ['GET', 'POST'])

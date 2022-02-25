@@ -41,14 +41,16 @@
 <h2>Graphs: </h2>
 <br>
 
-{% if graphJSON %}
-<div id="graph"></div>
+{% for graphJSON in graphList %}
+<div id="graph{{ loop.index0 }}"></div>
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script type='text/javascript'>
-  graph = document.getElementById('graph');
+  graph = document.getElementById('graph{{ loop.index0 }}');
   var graphs = {{ graphJSON | safe }};
   Plotly.newPlot(graph,graphs,{});
 </script>
-{% endif %}
+</div>
+
+{% endfor %}
 
 {% endblock %}
