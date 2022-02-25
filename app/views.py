@@ -177,41 +177,6 @@ def tryAgain():
     return render_template('tryAgain.html', title = 'Please Try Again', form = form)
 
 
-def timestampToDateString(x):
-    return datetime.fromtimestamp(x).strftime("%Y-%m-%d")
-
-def timestampToTimeString(x):
-    return datetime.fromtimestamp(x).strftime("%H:%M:%S")
-
-def timestampToDateTime(x):
-    return datetime.fromtimestamp(x)
-
-def checkSameDate(timestamp, dateString):
-    return timestampToDateString(timestamp) == dateString
-
-def checkTimePeriod(timeToCheck, startHour, endHour):
-    startHourTime = datetime.strptime(f"{timestampToDateString(timeToCheck)} {startHour}", "%Y-%m-%d %H:%M:%S")
-    endHourTime = datetime.strptime(f"{timestampToDateString(timeToCheck)} {endHour}", "%Y-%m-%d %H:%M:%S")
-    if endHour == "00:00:00":
-        endHourTime += timedelta(days=1)
-
-    timeToCheckDateTime = timestampToDateTime(timeToCheck).replace(microsecond=0) # truncate milliseconds
-
-    return startHourTime <= timeToCheckDateTime <= endHourTime
-
-def countTimes(column, start, end):
-    return len(column[checkTimePeriodVect(column, start, end)])
-
-
-def convertToCurrency(x):
-    if x != None:
-        return "£{:,.2f}".format(int(x))
-
-    return None
-
-checkSameDateVect = np.vectorize(checkSameDate)
-checkTimePeriodVect = np.vectorize(checkTimePeriod)
-
 @app.route('/viewreport', methods=['GET', 'POST'])
 def viewReport():
     allCars = database.Tickets.query.order_by(database.Tickets.id)
@@ -222,18 +187,22 @@ def viewReport():
 
 
     form = dateSelect()
-    
-    # for i in range(24):
-    #     timeString = f"{i:02}:00:00"
-    #     form.starthour.choices.append((timeString, timeString))
-    #     form.endhour.choices.append((timeString, timeString))
+    if request.method == 'GET':
+        form.startdate.data = datetime.date(datetime.now())
+        form.enddate.data = datetime.date(datetime.now())
+        form.startTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+        form.endTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+
 
     df = getDataFrame(os.path.join("app", "database.db"))
-    # form.date.choices = [(i, i) for i in getDates(df)]
+
 
     if request.method == 'POST':
-        table = getHTML(df, str(form.date.data), str(form.starthour.data), str(form.endhour.data))
-        graphJSON = lineGraphReport(df, str(form.date.data), str(form.starthour.data), str(form.endhour.data))
+        table = getHTML(df, str(form.startdate.data), str(form.enddate.data), 
+        str(form.startTime.data), str(form.endTime.data))
+
+        graphJSON = lineGraphReport(df, str(form.startdate.data), 
+        str(form.startTime.data), str(form.endTime.data))
 
         return render_template('viewReport.html', title = 'View Reports', form=form, 
         numCars = carsInside, graphJSON=graphJSON, table=table)

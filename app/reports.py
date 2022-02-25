@@ -15,6 +15,10 @@ def timestampToTimeString(x):
     return datetime.fromtimestamp(x).strftime("%H:%M:%S")
 
 
+def timestampToDateTimeString(x):
+    return datetime.fromtimestamp(x).strftime("%Y-%m-%d (%H:%M:%S)")
+
+
 def timestampToDateTime(x):
     return datetime.fromtimestamp(x)
 
@@ -23,15 +27,15 @@ def checkSameDate(timestamp, dateString):
     return timestampToDateString(timestamp) == dateString
 
 
-def checkTimePeriod(timeToCheck, startHour, endHour):
-    startHourTime = datetime.strptime(f"{timestampToDateString(timeToCheck)} {startHour}", "%Y-%m-%d %H:%M:%S")
-    endHourTime = datetime.strptime(f"{timestampToDateString(timeToCheck)} {endHour}", "%Y-%m-%d %H:%M:%S")
-    if endHour == "00:00:00":
-        endHourTime += timedelta(days=1)
+def checkTimePeriod(timeToCheck, startTime, endTime):
+    startTimeObj = datetime.strptime(f"{timestampToDateString(timeToCheck)} {startTime}", "%Y-%m-%d %H:%M:%S")
+    endTimeObj = datetime.strptime(f"{timestampToDateString(timeToCheck)} {endTime}", "%Y-%m-%d %H:%M:%S")
+    if endTime == "00:00:00":
+        endTimeObj += timedelta(days=1)
 
     timeToCheckDateTime = timestampToDateTime(timeToCheck).replace(microsecond=0) # truncate milliseconds
 
-    return startHourTime <= timeToCheckDateTime <= endHourTime
+    return startTimeObj <= timeToCheckDateTime <= endTimeObj
 
 
 def countTimes(column, start, end):
@@ -72,37 +76,62 @@ def getDates(df):
     return sorted(dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
     
 
-def getHTMLDF(df, date, starthour, endhour):
+def getHTMLDF(df, date, startTime, endTime, includeDate=False):
     """Supplements other methods, NOT to be used by itself"""
 
-    df = df.loc[checkSameDateVect(df['entry_time'], date)]
-    df = df.loc[checkTimePeriodVect(df['entry_time'], starthour, endhour)]
+    htmlDF = None
 
-    htmlDF = df.drop(columns=['paid'])
-    htmlDF['entry_time'] = df['entry_time'].map(timestampToTimeString)
-    htmlDF['exit_time'] = df['exit_time'].map(timestampToTimeString)
+    try:
+        df = df.loc[checkSameDateVect(df['entry_time'], date)]
+        df = df.loc[checkTimePeriodVect(df['entry_time'], startTime, endTime)]
+        htmlDF = df.drop(columns=['paid'])
+        includeDict = {True: timestampToDateTimeString, False: timestampToTimeString}
+        htmlDF['entry_time'] = df['entry_time'].map(includeDict[includeDate])
+        htmlDF['exit_time'] = df['exit_time'].map(includeDict[includeDate])
+        htmlDF['fee'] = htmlDF['fee'].map(convertToCurrency)
 
-    htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
-         "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
+    except ValueError: # if there's no results for the date range / time range
+        htmlDF = pd.DataFrame({i: [] for i in df.columns.values if i != 'paid'})
+
+    finally:
+        htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
+            "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
+            
         
-    htmlDF['Fee'] = htmlDF['Fee'].map(convertToCurrency)
-
     return htmlDF
     
 
-def getHTML(df, date, starthour, endhour):
+def getHTML(df, startDate, endDate, startTime, endTime):
     """Converts pandas dataframe to a table in HTML with nice column names, formatted fee etc.
     :param df (pd.DataFame): Pandas dataframe
     :param date (str): Date in yyyy-mm-dd format to filter data for
-    :param starthour (str): Earliest time to look at in hh:mm:ss form 
-    :param endhour (str): Latest time to look at in hh:mm:ss form
+    :param startTime (str): Earliest time to look at in hh:mm:ss form 
+    :param endTime (str): Latest time to look at in hh:mm:ss form
     :return (str): HTML code for the pandas dataframe as a table"""
 
     """Supplements getHTML method, NOT to be used by itself"""
 
-    htmlDF = getHTMLDF(df.copy(), date, starthour, endhour)
+    htmlDF = None
+    htmlDFList = []
+    x = datetime.strptime(startDate, "%Y-%m-%d")
+    endDateObj = datetime.strptime(endDate, "%Y-%m-%d")
 
-    htmlDF.reset_index(drop=True, inplace=True)
+    if x <= endDateObj:
+        includeDate = not (x == endDateObj)
+
+        while (x <= endDateObj):
+            htmlDFList.append(getHTMLDF(df.copy(), x.strftime("%Y-%m-%d"), startTime, endTime, includeDate=includeDate))
+            x += timedelta(days=1)
+
+        htmlDF = pd.concat(htmlDFList, ignore_index=True)
+        htmlDF.reset_index(drop=True, inplace=True)
+
+    else:
+        htmlDF = pd.DataFrame({i: [] for i in df.columns.values if i != 'paid'})
+        htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
+            "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
+
+
     headersHTML = '\n'.join([f'<th>{i}</th>' for i in htmlDF.columns.values])
     rowsHTMLlist = []
     for rowNum in range(len(htmlDF)):
@@ -125,31 +154,31 @@ def getHTML(df, date, starthour, endhour):
 </table>'''
 
 
-def lineGraphReport(df, date, starthour, endhour):
+def lineGraphReport(df, date, startTime, endTime):
     """Creates Car Park Report Line Graph with no. cars parked, no. entries, no. exits against time for a specific date
     :param df (pd.DataFame): Pandas dataframe
     :param date (str): Date in yyyy-mm-dd format to filter data for
-    :param starthour (str): Earliest time to look at in hh:mm:ss form 
-    :param endhour (str): Latest time to look at in hh:mm:ss form
+    :param startTime (str): Earliest time to look at in hh:mm:ss form 
+    :param endTime (str): Latest time to look at in hh:mm:ss form
     :return (str): Plotly JSON text for the plotly.js script to draw the graph"""
 
-    df = df.loc[checkSameDateVect(df['entry_time'], date)]
-    df = df.loc[checkTimePeriodVect(df['entry_time'], starthour, endhour)]
+    try:
+        df = df.loc[checkSameDateVect(df['entry_time'], date)]
+        df = df.loc[checkTimePeriodVect(df['entry_time'], startTime, endTime)]
 
-    if len(df['entry_time']) > 0:
+        
         entryTime = df['entry_time'].map(timestampToTimeString)
 
-        numEntries = entryTime.map(lambda x: countTimes(df['entry_time'], starthour, x))
-        numExits = entryTime.map(lambda x: countTimes(df['exit_time'], starthour, x))
+        numEntries = entryTime.map(lambda x: countTimes(df['entry_time'], startTime, x))
+        numExits = entryTime.map(lambda x: countTimes(df['exit_time'], startTime, x))
 
         numParked = numEntries - numExits
 
         parkedCarsDF = pd.DataFrame({"Time": entryTime, "No. cars parked": numParked, "No. entries": numEntries,
                 "No. exits": numExits})
 
-        parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title=f"Car Park Report ({date}) ({starthour[:-3]}-{endhour[:-3]})")#, template="plotly_dark")
+        parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title=f"Car Park Report ({date}) ({startTime[:-3]}-{endTime[:-3]})")#, template="plotly_dark")
         return json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
 
-    else:
+    except ValueError: # if there's no results for the date range / time range
         return None
-        

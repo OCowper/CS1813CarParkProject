@@ -10,20 +10,19 @@
   <br>
   <br>
   
-  <h2>Date + Time Range</h2>
+  <h2>Date + Time Range:</h2>
 
-  <br>
   <br>
 
   <form action="" method="POST" novalidate>
-    {{ form.date.label }}
-    {{ form.date }}
+    {{ form.startdate.label }}
+    {{ form.startdate }}
     {{ form.enddate.label }}
     {{ form.enddate }}
-    {{ form.starthour.label }}
-    {{ form.starthour }}
-    {{ form.endhour.label }}
-    {{ form.endhour }}
+    {{ form.startTime.label }}
+    {{ form.startTime }}
+    {{ form.endTime.label }}
+    {{ form.endTime }}
     {{ form.submit() }}
     {{ form.hidden_tag() }}
   </form>

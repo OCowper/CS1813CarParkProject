@@ -47,8 +47,8 @@ class endHappy(FlaskForm):
 
     
 class dateSelect(FlaskForm):
-    date = DateField('Start Date: ', format="%Y-%m-%d") # rename to start date later
+    startdate = DateField('Start Date: ', format="%Y-%m-%d") # rename to start date later
     enddate = DateField('End Date: ', format="%Y-%m-%d")
-    starthour = TimeField('Start Time: ', format="%H:%M")
-    endhour = TimeField('End Time: ', format="%H:%M")
+    startTime = TimeField('Start Time: ', format="%H:%M")
+    endTime = TimeField('End Time: ', format="%H:%M")
     submit = SubmitField()
