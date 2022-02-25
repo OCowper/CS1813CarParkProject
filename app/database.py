@@ -1,5 +1,6 @@
 from app import db
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 
 MAX_PLATE_LENGTH = 8
 MAX_NAME_LENGTH = 20
@@ -27,7 +28,7 @@ class SpecialCustomer(db.Model):
     def __repr__(self):
         return "License Plate {}, First Name {}, Surname {}, Local Authority {}, Local Consultancy {}".format(self.plate, self.first_name, self.surname, self.local_authority, self.local_consultancy)
 
-class ManagerLogin(db.Model):
+class ManagerLogin(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(MAX_NAME_LENGTH), nullable=False)
     password = db.Column(db.String(MAX_NAME_LENGTH), nullable=False)

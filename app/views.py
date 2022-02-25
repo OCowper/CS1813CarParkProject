@@ -1,19 +1,16 @@
+import os
+import time
+import math
+
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
 from app import database
 from datetime import datetime, timedelta
 from app.reports import *
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user, login_required, logout_user, current_user
 
-import json
-import plotly
-import plotly.express as px
-import pandas as pd
-import numpy as np
-import sqlite3
-import os
-import time
-import math
 
 def ticketsUpdate(curNP, startTime):
     curTickets = database.Tickets.query.order_by(database.Tickets.id)
@@ -91,6 +88,94 @@ data = DataHandler()
 def index():
     return render_template('index.html')
 
+
+@app.route('/mLogin', methods = ['GET', 'POST'])
+def mLogin():
+    form = mLoginForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            curUsername = form.username.data
+            curLogin = database.ManagerLogin.query.filter_by(username = curUsername).first()
+            if curLogin != None:
+                if curLogin.password == form.password.data: #if check_password_hash(curLogin.password, form.password.data): 
+                    flash("Logged in successfully!", category="success")
+                    login_user(curLogin, remember=True)
+                    return redirect('/mView')
+
+                
+                flash("Sorry, that username or password is incorrect.", category="error")
+
+            else:
+                flash("Sorry, that username or password is incorrect.", category="error")
+        
+        else:
+            flash("Please enter all fields!", category="error")
+    
+    return render_template('mLogin.html', title = 'Manager Sign In', form = form)
+
+
+@app.route('/mLogout')
+@login_required
+def mLogout():
+    logout_user()
+    return redirect('/index')
+
+
+@app.route('/mView', methods = ['GET', 'POST'])
+@login_required
+def mView():
+    if data.getHappyHour():
+        form = endHappy()
+    else:
+        form = startHappy()
+    if form.validate_on_submit():
+        data.toggleHappyHour()
+        return redirect('/mView')
+    return render_template('mView.html', title = 'Manager Menu', form = form)
+
+
+@app.route('/viewreport', methods=['GET', 'POST'])
+@login_required
+def viewReport():
+    allCars = database.Tickets.query.order_by(database.Tickets.id)
+    carsInside = 0
+    for car in allCars:
+        if car.paid == False:
+            carsInside = carsInside + 1
+
+
+    form = dateSelect()
+    if request.method == 'GET':
+        form.startdate.data = datetime.date(datetime.now())
+        form.enddate.data = datetime.date(datetime.now())
+        form.startTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+        form.endTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+
+
+    df = getDataFrame(os.path.join("app", "database.db"))
+
+
+    if request.method == 'POST':
+        table = getHTML(df, str(form.startdate.data), str(form.enddate.data), 
+        str(form.startTime.data), str(form.endTime.data))
+
+        graphList = []
+
+        x = form.startdate.data
+
+        while (x <= form.enddate.data):
+            graphList.append(lineGraphReport(df, str(x), 
+            str(form.startTime.data), str(form.endTime.data)))
+
+            x += timedelta(days=1)
+
+        return render_template('viewReport.html', title = 'View Reports', form=form, 
+        numCars = carsInside, graphList=graphList, table=table)
+    
+    return render_template('viewReport.html', title = 'View Reports', form=form, 
+    numCars = carsInside, graphList=[])
+
+
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if request.method == "POST":
@@ -145,29 +230,6 @@ def payment():
     else:
         return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
 
-@app.route('/mLogin', methods = ['GET', 'POST'])
-def mLogin():
-    form = mLoginForm()
-    if form.validate_on_submit():
-        curUsername = form.username.data
-        curLogin = database.ManagerLogin.query.filter_by(username = curUsername).first()
-        if curLogin != None:
-            if curLogin.password == form.password.data:
-                return redirect('/mView')
-            return redirect('/mTryAgain')
-        return redirect('/mTryAgain')
-    return render_template('mLogin.html', title = 'Manager Sign In', form = form)
-
-@app.route('/mView', methods = ['GET', 'POST'])
-def mView():
-    if data.getHappyHour():
-        form = endHappy()
-    else:
-        form = startHappy()
-    if form.validate_on_submit():
-        data.toggleHappyHour()
-        return redirect('/mView')
-    return render_template('mView.html', title = 'Manager Menu', form = form)
 
 @app.route('/tryAgain', methods = ['GET', 'POST'])
 def tryAgain():
@@ -177,51 +239,15 @@ def tryAgain():
     return render_template('tryAgain.html', title = 'Please Try Again', form = form)
 
 
-@app.route('/viewreport', methods=['GET', 'POST'])
-def viewReport():
-    allCars = database.Tickets.query.order_by(database.Tickets.id)
-    carsInside = 0
-    for car in allCars:
-        if car.paid == False:
-            carsInside = carsInside + 1
+# newUser = database.ManagerLogin(id=something, username=something, 
+#   password=generate_password_hash(somepassword, method='sha256'), first_name=something, surname=something)
+# database.db.session.add(newUser)
+# database.db.session.commit()
 
-
-    form = dateSelect()
-    if request.method == 'GET':
-        form.startdate.data = datetime.date(datetime.now())
-        form.enddate.data = datetime.date(datetime.now())
-        form.startTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
-        form.endTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
-
-
-    df = getDataFrame(os.path.join("app", "database.db"))
-
-
-    if request.method == 'POST':
-        table = getHTML(df, str(form.startdate.data), str(form.enddate.data), 
-        str(form.startTime.data), str(form.endTime.data))
-
-        graphList = []
-
-        x = form.startdate.data
-
-        while (x <= form.enddate.data):
-            graphList.append(lineGraphReport(df, str(x), 
-            str(form.startTime.data), str(form.endTime.data)))
-
-            x += timedelta(days=1)
-
-        return render_template('viewReport.html', title = 'View Reports', form=form, 
-        numCars = carsInside, graphList=graphList, table=table)
-    
-    return render_template('viewReport.html', title = 'View Reports', form=form, 
-    numCars = carsInside, graphList=[])
-
-
-@app.route('/mTryAgain', methods = ['GET', 'POST'])
-
-def mTryAgain():
-    form = returnB()
-    if form.validate_on_submit():
-        return redirect('/mLogin')
-    return render_template('mTryAgain.html', title = 'Please Try Again', form = form)
+# Left to do:
+# * Continue fixing login
+# * New dummy_values.sql with hashed passwords
+# * Continue bootstrap for nav bar and anywhere else that needs it
+# * New dummy_values.sql with GOOD dummy values for the tickets
+# Commit -m "Database automatically made if not found + working login + bootstrap"
+# Do hotfix of entryT or entryB where there is a </span. instead of </span>
