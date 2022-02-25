@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, IntegerField, SelectField
+from wtforms import StringField, SubmitField, PasswordField, IntegerField, SelectField, DateField, TimeField
 from wtforms.validators import DataRequired
 
 
@@ -44,8 +44,8 @@ class endHappy(FlaskForm):
     happyHourToggle = SubmitField('End Happy Hour')
 
 class setRecHappyHourForm(FlaskForm):
-    start = SelectField('Start Hour: ', choices=[], validators=[DataRequired()])
-    end = SelectField('End Hour: ', choices=[], validators=[DataRequired()])
+    start = TimeField('Start Time: ', format="%H:%M")
+    end = TimeField('End Time: ', format="%H:%M")
     submit = SubmitField('Enter')
     
     

@@ -59,6 +59,15 @@ class DataHandler:
 
     def getHappyHour(self):
         return self.happyHour
+
+    def checkHH(self):
+        if self.HHStart != None and self.HHEnd != None:
+            if self.HHStart <= datetime.time(datetime.now()) and datetime.time(datetime.now()) <= self.HHEnd:
+                self.happyHour = True
+            else:
+                self.happyHour = False
+        else:
+            self.happyHour = False
         
     def getDiscount(self):
         curCustomer = database.SpecialCustomer.query.filter_by(plate = self.customerNP).first()
@@ -157,6 +166,7 @@ def payment():
     if form.validate_on_submit():
         curID = data.getCurTID()
         curTicket = database.Tickets.query.filter_by(id = curID).first()
+        data.checkHH()
         curTicket.fee = data.calculatePrice()
         curTicket.paid = True
         database.db.session.commit()
@@ -181,6 +191,7 @@ def mLogin():
 
 @app.route('/mView', methods = ['GET', 'POST'])
 def mView():
+    data.checkHH()
     if data.getHappyHour():
         form = endHappy()
     else:
@@ -193,9 +204,9 @@ def mView():
 @app.route('/sHappyHour', methods = ['GET', 'POST'])
 def sHappyHour():
     form = setRecHappyHourForm()
-    dates = list(set(df['entry_time'].map(timestampToDateString).to_list()))
-    dates = sorted(dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
-    form.start.choices = [(i, i) for i in dates]
+    if request.method == 'GET':
+        form.start.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+        form.end.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
     if data.getHHStart != None and data.getHHEnd != None:
         Ttitle = ('Set Recurring Happy Hour, currently set between', data.getHHStart, 'and', data.getHHEnd)
     else:
