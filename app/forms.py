@@ -22,8 +22,8 @@ class entryButton(FlaskForm):
 
 
 class enterTicket(FlaskForm):
-    ticketNumber = IntegerField('Ticket Number', validators=[DataRequired()])
-    submit = SubmitField('Next')
+    ticketNumber = IntegerField('', validators=[DataRequired()])
+    submit = SubmitField('Exit')
 
 
 class returnB(FlaskForm):
@@ -44,7 +44,6 @@ class endHappy(FlaskForm):
     happyHourToggle = SubmitField('End Happy Hour')
 
 
-    
 class dateSelect(FlaskForm):
     date = SelectField('Date: ', choices=[])
     starthour = SelectField('Start Hour: ', choices=[])
