@@ -11,6 +11,9 @@
         <p>
             {{ form.customerNP.label }}<br>
             {{ form.customerNP(size=20, placeholder="numberplate") }}
+        {% for error in form.customerNP.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
         </p>
         <p>{{ form.submit() }}</p>
     </form>

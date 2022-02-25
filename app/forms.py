@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired
 
 
 class enterCustNP(FlaskForm):
-    customerNP = StringField("")
+    customerNP = StringField("", validators=[DataRequired()])
     submit = SubmitField('Enter the Car Park')
 
 
