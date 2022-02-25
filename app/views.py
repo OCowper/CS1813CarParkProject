@@ -86,11 +86,14 @@ data = DataHandler()
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', user=current_user)
 
 
 @app.route('/mLogin', methods = ['GET', 'POST'])
 def mLogin():
+    if current_user.is_authenticated:
+        return redirect('/mView')
+    
     form = mLoginForm()
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -111,7 +114,7 @@ def mLogin():
         else:
             flash("Please enter all fields!", category="error")
     
-    return render_template('mLogin.html', title = 'Manager Sign In', form = form)
+    return render_template('mLogin.html', title = 'Manager Sign In', form = form, user=current_user)
 
 
 @app.route('/mLogout')
@@ -131,8 +134,7 @@ def mView():
     if form.validate_on_submit():
         data.toggleHappyHour()
         return redirect('/mView')
-    return render_template('mView.html', title = 'Manager Menu', form = form)
-
+    return render_template('mView.html', title = 'Manager Menu', form = form, user=current_user)
 
 @app.route('/viewreport', methods=['GET', 'POST'])
 @login_required
@@ -170,14 +172,18 @@ def viewReport():
             x += timedelta(days=1)
 
         return render_template('viewReport.html', title = 'View Reports', form=form, 
-        numCars = carsInside, graphList=graphList, table=table)
+        numCars = carsInside, graphList=graphList, table=table, user=current_user)
     
     return render_template('viewReport.html', title = 'View Reports', form=form, 
-    numCars = carsInside, graphList=[])
+    numCars = carsInside, graphList=[], user=current_user)
 
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        flash("You are currently signed in as a manager, log out first!", category="error")
+        return redirect('/index')
+
     if request.method == "POST":
         formData = dict(request.form)
         data.customerNP = formData["customerNP"]
@@ -187,36 +193,54 @@ def login():
             startTime = time.time()
             ticketsUpdate(form.customerNP.data, startTime)
             return redirect('/entry')
-    return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form)
+    return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form, user=current_user)
 
 @app.route('/entry', methods = ['GET', 'POST'])
 def entry():
+    if current_user.is_authenticated:
+        flash("You are currently signed in as a manager, log out first!", category="error")
+        return redirect('/index')
+
     form = entryButton()
     if form.validate_on_submit():
         return redirect('/index')
-    return render_template('entryB.html', title = 'Press to Enter', form = form, number = data.getCurTicket())
+    return render_template('entryB.html', title = 'Press to Enter', form = form, number = data.getCurTicket(), user=current_user)
 
 @app.route('/signOut', methods = ['GET', 'POST'])
 def signOut():
+    if current_user.is_authenticated:
+        flash("You are currently signed in as a manager, log out first!", category="error")
+        return redirect('/index')
+
     form = enterTicket()
     if form.validate_on_submit():
         curID = form.ticketNumber.data
         curTicket = database.Tickets.query.filter_by(id = curID).first()
         data.setCurTID(curID)
         if curTicket != None:
-            if curTicket.paid == False:
+            if not curTicket.paid:
                 curTicket.exit_time = time.time()
                 database.db.session.commit()
                 data.setCurTicket(curTicket)
                 data.calcTime()
                 data.setCustomerNP(curTicket.plate)
                 return redirect('/payment')
-            return redirect ('/tryAgain')
-        return redirect ('/tryAgain')
-    return render_template('enterT.html', title = 'Enter Ticket Number', form = form)
+            else:
+                flash("Sorry, that ticket has already been paid. Please try again!", category="error")
+                return redirect('/signOut')
+                
+        flash("Sorry, that ticket does not exist. Please try again!", category="error")
+        return redirect('/signOut')
+
+    return render_template('enterT.html', title = 'Enter Ticket Number', form = form, user=current_user)
     
+
 @app.route('/payment', methods = ['GET', 'POST'])
 def payment():
+    if current_user.is_authenticated:
+        flash("You are currently signed in as a manager, log out first!", category="error")
+        return redirect('/index')
+
     form = paymentForm()
     if form.validate_on_submit():
         curID = data.getCurTID()
@@ -226,17 +250,9 @@ def payment():
         database.db.session.commit()
         return redirect('/index')
     if data.getHappyHour():
-        return render_template('enterPaymentHappy.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
+        return render_template('enterPaymentHappy.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}", user=current_user)
     else:
-        return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
-
-
-@app.route('/tryAgain', methods = ['GET', 'POST'])
-def tryAgain():
-    form = returnB()
-    if form.validate_on_submit():
-        return redirect('/signOut')
-    return render_template('tryAgain.html', title = 'Please Try Again', form = form)
+        return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}", user=current_user)
 
 
 # newUser = database.ManagerLogin(id=something, username=something, 
@@ -245,9 +261,7 @@ def tryAgain():
 # database.db.session.commit()
 
 # Left to do:
-# * Continue fixing login
+# * Continue bootstrap for anywhere else that needs it after merging with Zu CSS
 # * New dummy_values.sql with hashed passwords
-# * Continue bootstrap for nav bar and anywhere else that needs it
 # * New dummy_values.sql with GOOD dummy values for the tickets
-# Commit -m "Database automatically made if not found + working login + bootstrap"
 # Do hotfix of entryT or entryB where there is a </span. instead of </span>
