@@ -3,21 +3,44 @@
 {% block head %}
 	<h1>Report View</h1>
 	<h2>Current Number of Cars: {{ numCars }} </h2>
-{% endblock %}
+  {% endblock %}
+  
+  {% block body %}
+  
+  <br>
+  <br>
+  
+  <h2>Date + Time Range</h2>
 
-{% block body %}
+  <br>
+  <br>
 
-<form action="" method="POST" novalidate>
+  <form action="" method="POST" novalidate>
     {{ form.date.label }}
     {{ form.date }}
+    {{ form.enddate.label }}
+    {{ form.enddate }}
     {{ form.starthour.label }}
     {{ form.starthour }}
     {{ form.endhour.label }}
     {{ form.endhour }}
     {{ form.submit() }}
-</form>
+    {{ form.hidden_tag() }}
+  </form>
+  
+  <br>
+  <br>
 
-{{ table|safe }}
+	<h2>Tables: </h2>
+  
+  <br>
+  <br>
+
+  {{ table|safe }}
+  
+<br>
+<h2>Graphs: </h2>
+<br>
 
 {% if graphJSON %}
 <div id="graph"></div>

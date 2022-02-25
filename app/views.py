@@ -223,17 +223,17 @@ def viewReport():
 
     form = dateSelect()
     
-    for i in range(24):
-        timeString = f"{i:02}:00:00"
-        form.starthour.choices.append((timeString, timeString))
-        form.endhour.choices.append((timeString, timeString))
+    # for i in range(24):
+    #     timeString = f"{i:02}:00:00"
+    #     form.starthour.choices.append((timeString, timeString))
+    #     form.endhour.choices.append((timeString, timeString))
 
     df = getDataFrame(os.path.join("app", "database.db"))
-    form.date.choices = [(i, i) for i in getDates(df)]
+    # form.date.choices = [(i, i) for i in getDates(df)]
 
     if request.method == 'POST':
-        table = getHTML(df, form.date.data, form.starthour.data, form.endhour.data)
-        graphJSON = lineGraphReport(df, form.date.data, form.starthour.data, form.endhour.data)
+        table = getHTML(df, str(form.date.data), str(form.starthour.data), str(form.endhour.data))
+        graphJSON = lineGraphReport(df, str(form.date.data), str(form.starthour.data), str(form.endhour.data))
 
         return render_template('viewReport.html', title = 'View Reports', form=form, 
         numCars = carsInside, graphJSON=graphJSON, table=table)

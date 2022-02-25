@@ -1,5 +1,6 @@
+from wsgiref.validate import validator
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, IntegerField, SelectField
+from wtforms import StringField, SubmitField, PasswordField, IntegerField, SelectField, DateField, TimeField
 from wtforms.validators import DataRequired
 
 
@@ -46,7 +47,8 @@ class endHappy(FlaskForm):
 
     
 class dateSelect(FlaskForm):
-    date = SelectField('Date: ', choices=[])
-    starthour = SelectField('Start Hour: ', choices=[])
-    endhour = SelectField('End Hour: ', choices=[])
+    date = DateField('Start Date: ', format="%Y-%m-%d") # rename to start date later
+    enddate = DateField('End Date: ', format="%Y-%m-%d")
+    starthour = TimeField('Start Time: ', format="%H:%M")
+    endhour = TimeField('End Time: ', format="%H:%M")
     submit = SubmitField()
