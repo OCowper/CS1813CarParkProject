@@ -3,13 +3,11 @@ from app import app
 from app.forms import *
 from app import database
 from datetime import datetime, timedelta
+from app.reports import *
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user, login_required, logout_user, current_user
 
-import json
-import plotly
-import plotly.express as px
-import pandas as pd
-import numpy as np
-import sqlite3
+
 import os
 import time
 import math
@@ -114,10 +112,15 @@ data = DataHandler()
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', user=current_user)
+
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        flash("You are currently signed in as a manager, log out first!", category="error")
+        return redirect('/index')
+
     if request.method == "POST":
         formData = dict(request.form)
         data.customerNP = formData["customerNP"]
@@ -127,72 +130,94 @@ def login():
             startTime = time.time()
             ticketsUpdate(form.customerNP.data, startTime)
             return redirect('/entry')
-    return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form)
+    return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form, user=current_user)
 
 @app.route('/entry', methods = ['GET', 'POST'])
 def entry():
+    if current_user.is_authenticated:
+        flash("You are currently signed in as a manager, log out first!", category="error")
+        return redirect('/index')
+
     form = entryButton()
     if form.validate_on_submit():
         return redirect('/index')
-    return render_template('entryB.html', title = 'Press to Enter', form = form, number = data.getCurTicket())
+    return render_template('entryB.html', title = 'Press to Enter', form = form, number = data.getCurTicket(), user=current_user)
 
 @app.route('/signOut', methods = ['GET', 'POST'])
 def signOut():
+    if current_user.is_authenticated:
+        flash("You are currently signed in as a manager, log out first!", category="error")
+        return redirect('/index')
+
     form = enterTicket()
     if form.validate_on_submit():
         curID = form.ticketNumber.data
         curTicket = database.Tickets.query.filter_by(id = curID).first()
         data.setCurTID(curID)
         if curTicket != None:
-            if curTicket.paid == False:
+            if not curTicket.paid:
                 curTicket.exit_time = time.time()
                 database.db.session.commit()
                 data.setCurTicket(curTicket)
                 data.calcTime()
                 data.setCustomerNP(curTicket.plate)
                 return redirect('/payment')
-            return redirect ('/tryAgain')
-        return redirect ('/tryAgain')
-    return render_template('enterT.html', title = 'Enter Ticket Number', form = form)
-
-
-@app.route('/tryAgain', methods = ['GET', 'POST'])
-def tryAgain():
-    form = returnB()
-    if form.validate_on_submit():
+            else:
+                flash("Sorry, that ticket has already been paid. Please try again!", category="error")
+                return redirect('/signOut')
+                
+        flash("Sorry, that ticket does not exist. Please try again!", category="error")
         return redirect('/signOut')
-    return render_template('tryAgain.html', title = 'Please Try Again', form = form)
-    
+
+    return render_template('enterT.html', title = 'Enter Ticket Number', form = form, user=current_user)
+   
+
 @app.route('/payment', methods = ['GET', 'POST'])
 def payment():
+    if current_user.is_authenticated:
+        flash("You are currently signed in as a manager, log out first!", category="error")
+        return redirect('/index')
+
     form = paymentForm()
     if form.validate_on_submit():
         curID = data.getCurTID()
         curTicket = database.Tickets.query.filter_by(id = curID).first()
-        data.checkHH()
         curTicket.fee = data.calculatePrice()
         curTicket.paid = True
         database.db.session.commit()
         return redirect('/index')
     if data.getHappyHour():
-        return render_template('enterPaymentHappy.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
+        return render_template('enterPaymentHappy.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}", user=current_user)
     else:
-        return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}")
+        return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}", user=current_user)
 
 @app.route('/mLogin', methods = ['GET', 'POST'])
 def mLogin():
+    if current_user.is_authenticated:
+        return redirect('/mView')
+    
     form = mLoginForm()
-    if form.validate_on_submit():
-        curUsername = form.username.data
-        curLogin = database.ManagerLogin.query.filter_by(username = curUsername).first()
-        if curLogin != None:
-            if curLogin.password == form.password.data:
-                return redirect('/mView')
-            return redirect('/mTryAgain')
-        return redirect('/mTryAgain')
-    return render_template('mLogin.html', title = 'Manager Sign In', form = form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            curUsername = form.username.data
+            curLogin = database.ManagerLogin.query.filter_by(username = curUsername).first()
+            if curLogin != None:
+                if curLogin.password == form.password.data: #if check_password_hash(curLogin.password, form.password.data): 
+                    flash("Logged in successfully!", category="success")
+                    login_user(curLogin, remember=True)
+                    return redirect('/mView')
+        
+                flash("Sorry, that username or password is incorrect.", category="error")
+
+            else:
+                flash("Sorry, that username or password is incorrect.", category="error")
+        
+    
+    return render_template('mLogin.html', title = 'Manager Sign In', form = form, user=current_user)
+
 
 @app.route('/mView', methods = ['GET', 'POST'])
+@login_required
 def mView():
     data.checkHH()
     if data.getHappyHour():
@@ -205,7 +230,9 @@ def mView():
         if form.validate_on_submit():
             data.startHappyHour()
             return redirect('/mView')
-    return render_template('mView.html', title = 'Manager Menu', form = form)
+
+    return render_template('mView.html', title = 'Manager Menu', form = form, user=current_user)
+
 
 @app.route('/sHappyHour', methods = ['GET', 'POST'])
 def sHappyHour():
@@ -214,51 +241,19 @@ def sHappyHour():
         form.start.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
         form.end.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
     if data.getHHStart != None and data.getHHEnd != None:
-        Ttitle = ('Set Recurring Happy Hour, currently set between', data.getHHStart, 'and', data.getHHEnd)
+        Ttitle = 'Set Recurring Happy Hour, currently set between' + data.getHHStart + 'and' + data.getHHEnd
     else:
-        Ttitle = ('Set Recurring Happy Hour, currently set to none')
+        Ttitle = 'Set Recurring Happy Hour, currently set to none'
     if form.validate_on_submit():
         data.setHHStart(form.start.data)
         data.setHHEnd(form.end.data)
         return redirect('/sHappyHour')
-    return render_template('sHappyHour.html', title = 'Set Recurring Happy Hour', form = form)
 
-def timestampToDateString(x):
-    return datetime.fromtimestamp(x).strftime("%Y-%m-%d")
+    return render_template('sHappyHour.html', title =Ttitle, form = form, user=current_user)
 
-def timestampToTimeString(x):
-    return datetime.fromtimestamp(x).strftime("%H:%M:%S")
-
-def timestampToDateTime(x):
-    return datetime.fromtimestamp(x)
-
-def checkSameDate(timestamp, dateString):
-    return timestampToDateString(timestamp) == dateString
-
-def checkTimePeriod(timeToCheck, startHour, endHour):
-    startHourTime = datetime.strptime(f"{timestampToDateString(timeToCheck)} {startHour}", "%Y-%m-%d %H:%M:%S")
-    endHourTime = datetime.strptime(f"{timestampToDateString(timeToCheck)} {endHour}", "%Y-%m-%d %H:%M:%S")
-    if endHour == "00:00:00":
-        endHourTime += timedelta(days=1)
-
-    timeToCheckDateTime = timestampToDateTime(timeToCheck).replace(microsecond=0) # truncate milliseconds
-
-    return startHourTime <= timeToCheckDateTime <= endHourTime
-
-def countTimes(column, start, end):
-    return len(column[checkTimePeriodVect(column, start, end)])
-
-
-def convertToCurrency(x):
-    if x != None:
-        return "£{:,.2f}".format(int(x))
-
-    return None
-
-checkSameDateVect = np.vectorize(checkSameDate)
-checkTimePeriodVect = np.vectorize(checkTimePeriod)
 
 @app.route('/viewreport', methods=['GET', 'POST'])
+@login_required
 def viewReport():
     allCars = database.Tickets.query.order_by(database.Tickets.id)
     carsInside = 0
@@ -268,62 +263,41 @@ def viewReport():
 
 
     form = dateSelect()
-    
-    for i in range(24):
-        timeString = f"{i:02}:00:00"
-        form.starthour.choices.append((timeString, timeString))
-        form.endhour.choices.append((timeString, timeString))
+    if request.method == 'GET':
+        form.startdate.data = datetime.date(datetime.now())
+        form.enddate.data = datetime.date(datetime.now())
+        form.startTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+        form.endTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
 
-    con = sqlite3.connect(os.path.join("app", "database.db"))
-    df = pd.read_sql_query("SELECT * from tickets", con)
-    con.close()
 
-    dates = list(set(df['entry_time'].map(timestampToDateString).to_list()))
-    dates = sorted(dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
-    form.date.choices = [(i, i) for i in dates]
+    df = getDataFrame(os.path.join("app", "database.db"))
 
-    df = df[df['paid'] == 1]
 
-    
     if request.method == 'POST':
-        df = df.loc[checkSameDateVect(df['entry_time'], form.date.data)]
-        df = df.loc[checkTimePeriodVect(df['entry_time'], form.starthour.data, form.endhour.data)]
+        table = getHTML(df, str(form.startdate.data), str(form.enddate.data), 
+        str(form.startTime.data), str(form.endTime.data))
 
-        htmlDF = df.drop(columns=['paid'])
-        htmlDF['entry_time'] = df['entry_time'].map(timestampToTimeString)
-        htmlDF['exit_time'] = df['exit_time'].map(timestampToTimeString)
+        graphList = []
 
-        graphJSON = None
-        if len(htmlDF['entry_time']) > 0: # Drawing Graph
-            numEntries = htmlDF['entry_time'].map(lambda x: countTimes(df['entry_time'], form.starthour.data, x))
-            numExits = htmlDF['entry_time'].map(lambda x: countTimes(df['exit_time'], form.starthour.data, x))
-            numParked = numEntries - numExits
+        x = form.startdate.data
 
-            parkedCarsDF = pd.DataFrame({"Time": htmlDF['entry_time'], "No. cars parked": numParked, "No. entries": numEntries,
-            "No. exits": numExits})
+        while (x <= form.enddate.data):
+            graphList.append(lineGraphReport(df, str(x), 
+            str(form.startTime.data), str(form.endTime.data)))
 
-            #finish graph user stories
+            x += timedelta(days=1)
 
-            parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title="Car Park Report")#, template="plotly_dark")
-
-
-            graphJSON = json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
-
-        # Make table look nice for HTML
-        htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
-         "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
-        
-        htmlDF['Fee'] = htmlDF['Fee'].map(convertToCurrency)
-
-        return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside, graphJSON=graphJSON)
+        return render_template('viewReport.html', title = 'View Reports', form=form, 
+        numCars = carsInside, graphList=graphList, table=table, user=current_user)
     
-    return render_template('viewReport.html', title = 'View Reports', tables=[], titles=[], form=form, numCars = carsInside)
+    return render_template('viewReport.html', title = 'View Reports', form=form, 
+    numCars = carsInside, graphList=[], user=current_user)
 
+# newUser = database.ManagerLogin(id=something, username=something, 
+#   password=generate_password_hash(somepassword, method='sha256'), first_name=something, surname=something)
+# database.db.session.add(newUser)
+# database.db.session.commit()
 
-@app.route('/mTryAgain', methods = ['GET', 'POST'])
-
-def mTryAgain():
-    form = returnB()
-    if form.validate_on_submit():
-        return redirect('/mLogin')
-    return render_template('mTryAgain.html', title = 'Please Try Again', form = form)
+# Left to do:
+# * New dummy_values.sql with hashed passwords
+# * New dummy_values.sql with GOOD dummy values for the tickets
