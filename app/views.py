@@ -248,10 +248,10 @@ def sHappyHour():
     if request.method == 'GET':
         form.start.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
         form.end.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
-    if data.getHHStart != None and data.getHHEnd != None:
-        Ttitle = 'Set Recurring Happy Hour, currently set between' + data.getHHStart + 'and' + data.getHHEnd
+    if data.getHHStart() != None and data.getHHEnd() != None:
+        Ttitle = 'Set daily Happy Hour, currently set between ' + data.getHHStart().strftime("%H:%M") + ' and ' + data.getHHEnd().strftime("%H:%M")
     else:
-        Ttitle = 'Set Recurring Happy Hour, currently set to none'
+        Ttitle = 'Set daily Happy Hour, currently set to none'
     if form.validate_on_submit():
         data.setHHStart(form.start.data)
         data.setHHEnd(form.end.data)
