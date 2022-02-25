@@ -32,8 +32,22 @@ class DataHandler:
         self.customerNP = None # str
         self.totalTime = None # int
         self.happyHour = False # boolean
-        self.curTicket = None
-        self.curTID = None
+        self.curTicket = None # ticket
+        self.curTID = None # int
+        self.HHStart = None # datetime
+        self.HHEnd = None # datetime
+
+    def setHHStart(self, HHStart):
+        self.HHStart = HHStart
+
+    def getHHStart(self):
+        return self.HHStart
+
+    def setHHEnd(self, HHEnd):
+        self.HHEnd = HHEnd
+
+    def getHHEnd(self):
+        return self.HHEnd
 
     def setCurTID(self, curTID):
         self.curTID = curTID
@@ -46,6 +60,15 @@ class DataHandler:
 
     def getHappyHour(self):
         return self.happyHour
+
+    def checkHH(self):
+        if self.HHStart != None and self.HHEnd != None:
+            if self.HHStart <= datetime.time(datetime.now()) and datetime.time(datetime.now()) <= self.HHEnd:
+                self.happyHour = True
+            else:
+                self.happyHour = False
+        else:
+            self.happyHour = False
         
     def getDiscount(self):
         curCustomer = database.SpecialCustomer.query.filter_by(plate = self.customerNP).first()
@@ -129,6 +152,14 @@ def signOut():
             return redirect ('/tryAgain')
         return redirect ('/tryAgain')
     return render_template('enterT.html', title = 'Enter Ticket Number', form = form)
+
+
+@app.route('/tryAgain', methods = ['GET', 'POST'])
+def tryAgain():
+    form = returnB()
+    if form.validate_on_submit():
+        return redirect('/signOut')
+    return render_template('tryAgain.html', title = 'Please Try Again', form = form)
     
 @app.route('/payment', methods = ['GET', 'POST'])
 def payment():
@@ -136,6 +167,7 @@ def payment():
     if form.validate_on_submit():
         curID = data.getCurTID()
         curTicket = database.Tickets.query.filter_by(id = curID).first()
+        data.checkHH()
         curTicket.fee = data.calculatePrice()
         curTicket.paid = True
         database.db.session.commit()
@@ -160,6 +192,7 @@ def mLogin():
 
 @app.route('/mView', methods = ['GET', 'POST'])
 def mView():
+    data.checkHH()
     if data.getHappyHour():
         form = endHappy()
     else:
@@ -169,13 +202,21 @@ def mView():
         return redirect('/mView')
     return render_template('mView.html', title = 'Manager Menu', form = form)
 
-@app.route('/tryAgain', methods = ['GET', 'POST'])
-def tryAgain():
-    form = returnB()
+@app.route('/sHappyHour', methods = ['GET', 'POST'])
+def sHappyHour():
+    form = setRecHappyHourForm()
+    if request.method == 'GET':
+        form.start.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+        form.end.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+    if data.getHHStart != None and data.getHHEnd != None:
+        Ttitle = ('Set Recurring Happy Hour, currently set between', data.getHHStart, 'and', data.getHHEnd)
+    else:
+        Ttitle = ('Set Recurring Happy Hour, currently set to none')
     if form.validate_on_submit():
-        return redirect('/signOut')
-    return render_template('tryAgain.html', title = 'Please Try Again', form = form)
-
+        data.setHHStart(form.start.data)
+        data.setHHEnd(form.end.data)
+        return redirect('/sHappyHour')
+    return render_template('sHappyHour.html', title = 'Set Recurring Happy Hour', form = form)
 
 @app.route('/viewreport', methods=['GET', 'POST'])
 def viewReport():
