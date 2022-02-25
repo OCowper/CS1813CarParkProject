@@ -244,4 +244,3 @@ cython_debug/
 
 # Personal files
 app/database.db
-app/dummy_values.sql
