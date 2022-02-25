@@ -17,12 +17,7 @@
     {{ form.submit() }}
 </form>
 
-{% for table in tables %}
-
-{{titles[loop.index]}}
 {{ table|safe }}
-
-{% endfor %}
 
 {% if graphJSON %}
 <div id="graph"></div>

@@ -3,6 +3,7 @@ from app import app
 from app.forms import *
 from app import database
 from datetime import datetime, timedelta
+from app.reports import *
 
 import json
 import plotly
@@ -227,50 +228,18 @@ def viewReport():
         form.starthour.choices.append((timeString, timeString))
         form.endhour.choices.append((timeString, timeString))
 
-    con = sqlite3.connect(os.path.join("app", "database.db"))
-    df = pd.read_sql_query("SELECT * from tickets", con)
-    con.close()
+    df = getDataFrame(os.path.join("app", "database.db"))
+    form.date.choices = [(i, i) for i in getDates(df)]
 
-    dates = list(set(df['entry_time'].map(timestampToDateString).to_list()))
-    dates = sorted(dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
-    form.date.choices = [(i, i) for i in dates]
-
-    df = df[df['paid'] == 1]
-
-    
     if request.method == 'POST':
-        df = df.loc[checkSameDateVect(df['entry_time'], form.date.data)]
-        df = df.loc[checkTimePeriodVect(df['entry_time'], form.starthour.data, form.endhour.data)]
+        table = getHTML(df, form.date.data, form.starthour.data, form.endhour.data)
+        graphJSON = lineGraphReport(df, form.date.data, form.starthour.data, form.endhour.data)
 
-        htmlDF = df.drop(columns=['paid'])
-        htmlDF['entry_time'] = df['entry_time'].map(timestampToTimeString)
-        htmlDF['exit_time'] = df['exit_time'].map(timestampToTimeString)
-
-        graphJSON = None
-        if len(htmlDF['entry_time']) > 0: # Drawing Graph
-            numEntries = htmlDF['entry_time'].map(lambda x: countTimes(df['entry_time'], form.starthour.data, x))
-            numExits = htmlDF['entry_time'].map(lambda x: countTimes(df['exit_time'], form.starthour.data, x))
-            numParked = numEntries - numExits
-
-            parkedCarsDF = pd.DataFrame({"Time": htmlDF['entry_time'], "No. cars parked": numParked, "No. entries": numEntries,
-            "No. exits": numExits})
-
-            #finish graph user stories
-
-            parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title="Car Park Report")#, template="plotly_dark")
-
-
-            graphJSON = json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
-
-        # Make table look nice for HTML
-        htmlDF = htmlDF.rename(columns={"id": "Ticket ID", "plate": "Plate",
-         "entry_time": "Entry Time", "exit_time": "Exit Time", "fee": "Fee"})
-        
-        htmlDF['Fee'] = htmlDF['Fee'].map(convertToCurrency)
-
-        return render_template('viewReport.html', title = 'View Reports', tables=[htmlDF.to_html(classes='data', index=False)], titles=df.columns.values, form=form, numCars = carsInside, graphJSON=graphJSON)
+        return render_template('viewReport.html', title = 'View Reports', form=form, 
+        numCars = carsInside, graphJSON=graphJSON, table=table)
     
-    return render_template('viewReport.html', title = 'View Reports', tables=[], titles=[], form=form, numCars = carsInside)
+    return render_template('viewReport.html', title = 'View Reports', form=form, 
+    numCars = carsInside)
 
 
 @app.route('/mTryAgain', methods = ['GET', 'POST'])
