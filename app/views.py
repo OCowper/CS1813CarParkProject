@@ -234,6 +234,13 @@ def mView():
     return render_template('mView.html', title = 'Manager Menu', form = form, user=current_user)
 
 
+@app.route('/mLogout')
+@login_required
+def mLogout():
+    logout_user()
+    return redirect('/index')
+
+
 @app.route('/sHappyHour', methods = ['GET', 'POST'])
 def sHappyHour():
     form = setRecHappyHourForm()
