@@ -123,6 +123,9 @@ def getHTML(df, startDate, endDate, startTime, endTime):
             htmlDFList.append(getHTMLDF(df.copy(), x.strftime("%Y-%m-%d"), startTime, endTime, includeDate=includeDate))
             x += timedelta(days=1)
 
+        if not all([len(i) == 0 for i in htmlDFList]):
+            htmlDFList = [i for i in htmlDFList if len(i) > 0]
+
         htmlDF = pd.concat(htmlDFList, ignore_index=True)
         htmlDF.reset_index(drop=True, inplace=True)
 
