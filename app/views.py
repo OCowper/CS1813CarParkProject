@@ -306,4 +306,3 @@ def payment():
 # * Continue bootstrap for anywhere else that needs it after merging with Zu CSS
 # * New dummy_values.sql with hashed passwords
 # * New dummy_values.sql with GOOD dummy values for the tickets
-# Do hotfix of entryT or entryB where there is a </span. instead of </span>
