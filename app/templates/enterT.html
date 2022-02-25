@@ -1,20 +1,21 @@
 {% extends "base.html" %}
 
 {% block head %}
-	<h1>Exit the Car Park</h1>
-	<h7>Please enter your ticket number</h7>
+
 {% endblock %}
 
 {% block body %}
-    <form action="" method="post" novalidate>
+    <form  class="exit_box" action="" method="post" novalidate>
+		<h1>Please enter your ticket number</h1>
         {{ form.hidden_tag() }}
         <p>
             {{ form.ticketNumber.label }}<br>
-            {{ form.ticketNumber(size=32) }}
+            {{ form.ticketNumber(size=32, placeholder="Ticket Number") }}
 	    {% for error in form.ticketNumber.errors %}
 	    <span style="color: red;">[{{ error }}]</span.
 	    {% endfor%}
         </p>
+		
         <p>{{ form.submit() }}</p>
     </form>
 {% endblock %}

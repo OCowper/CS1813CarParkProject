@@ -80,6 +80,7 @@ body {
     transition: 0.2s;
     border: 2px solid #3498db;
     outline: 0;
+    color: white;
 }
 
 .box input[type="text"]:focus{
@@ -99,6 +100,7 @@ body {
     transition: 0.25s;
     border: 2px solid #2ecc71;
     outline: 0;
+
 }
 
 .box input[type="submit"]:hover{
@@ -134,6 +136,7 @@ body {
     transition: 0.2s;
     border: 2px solid #3498db;
     outline: 0;
+    color: white;
 }
 
 .manager_box input[type="text"]:focus, .manager_box input[type="password"]:focus{
@@ -160,6 +163,210 @@ body {
     background: #2ecc71;
 
 }
+
+
+.entry_box{
+    width:360px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+}
+
+.entry_box h1{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 300;
+}
+
+
+.entry_box input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid #2ecc71;
+    outline: 0;
+
+}
+
+.entry_box input[type="submit"]:hover{
+    background: #2ecc71;
+}
+
+.exit_box{
+    width:460px;
+    height: 280px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+}
+
+.exit_box h1{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 300;
+}
+
+.exit_box input[type="IntegerField"]{
+    border: 0;
+    background: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.2s;
+    border: 2px solid #3498db;
+    outline: 0;
+}
+
+.exit_box input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid #2ecc71;
+    outline: 0;
+}
+
+
+.exit_box input[type="submit"]:hover{
+    background: #2ecc71;
+}
+
+.WrongDetailsBox{
+    width:460px;
+    height: 280px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+}
+
+.WrongDetailsBox h2{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+
+.WrongDetailsBox input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid #2ecc71;
+    outline: 0;
+}
+
+.WrongDetailsBox input[type="submit"]:hover{
+    background: #2ecc71;
+}
+
+
+
+.InvalidTicketBox{
+    width:460px;
+    height: 280px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+}
+
+.InvalidTicketBox h2{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+.InvalidTicketBox input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid #2ecc71;
+    outline: 0;
+}
+
+
+.InvalidTicketBox input[type="submit"]:hover{
+    background: #2ecc71;
+}
+
+.PaymentBox{
+    width:350px;
+    height: 200px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+}
+
+
+.PaymentBox h3{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+
+.PaymentBox input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid #2ecc71;
+    outline: 0;
+}
+
+.PaymentBox input[type="submit"]:hover{
+    background: #2ecc71;
+}
+
 
 .dataframe {
     font-family: Arial, Helvetica, sans-serif;
