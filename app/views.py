@@ -31,8 +31,22 @@ class DataHandler:
         self.customerNP = None # str
         self.totalTime = None # int
         self.happyHour = False # boolean
-        self.curTicket = None
-        self.curTID = None
+        self.curTicket = None # ticket
+        self.curTID = None # int
+        self.HHStart = None # datetime
+        self.HHEnd = None # datetime
+
+    def setHHStart(self, HHStart):
+        self.HHStart = HHStart
+
+    def getHHStart(self):
+        return self.HHStart
+
+    def setHHEnd(self, HHEnd):
+        self.HHEnd = HHEnd
+
+    def getHHEnd(self):
+        return self.HHEnd
 
     def setCurTID(self, curTID):
         self.curTID = curTID
@@ -128,6 +142,14 @@ def signOut():
             return redirect ('/tryAgain')
         return redirect ('/tryAgain')
     return render_template('enterT.html', title = 'Enter Ticket Number', form = form)
+
+
+@app.route('/tryAgain', methods = ['GET', 'POST'])
+def tryAgain():
+    form = returnB()
+    if form.validate_on_submit():
+        return redirect('/signOut')
+    return render_template('tryAgain.html', title = 'Please Try Again', form = form)
     
 @app.route('/payment', methods = ['GET', 'POST'])
 def payment():
@@ -168,13 +190,21 @@ def mView():
         return redirect('/mView')
     return render_template('mView.html', title = 'Manager Menu', form = form)
 
-@app.route('/tryAgain', methods = ['GET', 'POST'])
-def tryAgain():
-    form = returnB()
+@app.route('/sHappyHour', methods = ['GET', 'POST'])
+def sHappyHour():
+    form = setRecHappyHourForm()
+    dates = list(set(df['entry_time'].map(timestampToDateString).to_list()))
+    dates = sorted(dates, key=lambda x: datetime.strptime(x, "%Y-%m-%d"))
+    form.start.choices = [(i, i) for i in dates]
+    if data.getHHStart != None and data.getHHEnd != None:
+        Ttitle = ('Set Recurring Happy Hour, currently set between', data.getHHStart, 'and', data.getHHEnd)
+    else:
+        Ttitle = ('Set Recurring Happy Hour, currently set to none')
     if form.validate_on_submit():
-        return redirect('/signOut')
-    return render_template('tryAgain.html', title = 'Please Try Again', form = form)
-
+        data.setHHStart(form.start.data)
+        data.setHHEnd(form.end.data)
+        return redirect('/sHappyHour')
+    return render_template('sHappyHour.html', title = 'Set Recurring Happy Hour', form = form)
 
 def timestampToDateString(x):
     return datetime.fromtimestamp(x).strftime("%Y-%m-%d")
