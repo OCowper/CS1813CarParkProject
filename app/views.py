@@ -325,7 +325,3 @@ def viewReport():
     
     return render_template('viewReport.html', title = 'View Reports', form=form, 
     numCars = carsInside, graphList=[], user=current_user)
-
-
-# Left to do:
-# * New dummy_values.sql with GOOD dummy values for the tickets
