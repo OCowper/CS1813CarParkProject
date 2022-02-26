@@ -1,20 +1,27 @@
 {% extends "base.html" %}
 
 {% block head %}
-	<h1>Manager View</h1>
+
 {% endblock %}
 
 {% block body %}
-    <h1> Hello {{ user.first_name }} {{ user.surname }}</h1>
+    <h1 class = "mngrName"> Hello {{ user.first_name }} {{ user.surname }}</h1>
     <br>
-    <p><a href="/viewreport">View Reports</p>
-    <p><a href="/index">Schedule Reports</a></p>
-    <p>
-    <form action="" method="post" novalidate>
+
+	<form class ="viewreportBTN" action="/viewreport" method="get">
+		<input type="submit" value="View Reports">
+	</form>
+
+	<form class="schedulereportsBTN" action="/index" method="get">
+		<input type="submit" value="Schedule Reports">
+	</form>
+    <form class = "HpyHrBTN" action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>{{ form.happyHourToggle() }}</p>
     </form>
-    </p>
-    <p><a href="/sHappyHour">Schedule Happy Hour</a></p>
-    <p><a href="/index">Return to Main Menu</a></p>
+
+	<form class = "ScheduleHpyHrBTN" action="/sHappyHour" method="get">
+		<input type="submit" value = "Schedule Happy Hour">
+	</form>
+
 {% endblock %}
