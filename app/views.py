@@ -1,3 +1,5 @@
+#REMMEBER TO GITIGNORE FILE.TXT AND HAVE IT CREATE A FRESH VERSION
+
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
@@ -42,10 +44,13 @@ class DataHandler:
         self.customerNP = None # str
         self.totalTime = None # int
         self.happyHour = False # boolean
+        self.HHOverride = False
         self.curTicket = None # ticket
         self.curTID = None # int
-        self.HHStart = datetime.time(datetime.strptime("00:00:AM", "%H:%M:%p")) # datetime
-        self.HHEnd = datetime.time(datetime.strptime("00:00:AM", "%H:%M:%p")) # datetime
+        #self.HHStart = datetime.time(datetime.strptime("00:00:AM", "%H:%M:%p")) # datetime
+        #self.HHEnd = datetime.time(datetime.strptime("00:00:AM", "%H:%M:%p")) # datetime
+        self.HHStart = None
+        self.HHEnd = None
 
     def setHHStart(self, HHStart):
         self.HHStart = HHStart
@@ -81,15 +86,16 @@ class DataHandler:
             self.happyHour = False
         
     def getDiscount(self):
+        self.checkHH()
         curCustomer = database.SpecialCustomer.query.filter_by(plate = self.customerNP).first()
         if curCustomer != None:
-            if curCustomer.local_authority == True or self.happyHour == True:
+            if curCustomer.local_authority == True or self.happyHour == True or self.HHOverride == True:
                 return 0
             elif curCustomer.local_consultancy == True:
                 return 0.5
             else:
                 return 1
-        elif self.happyHour == True:
+        elif self.happyHour == True or self.HHOverride == True:
             return 0
         else:
             return 1
@@ -113,10 +119,13 @@ class DataHandler:
         self.totalTime = self.curTicket.exit_time - self.curTicket.entry_time
 
     def startHappyHour(self):
-        self.happyHour = True
+        self.HHOverride = True
 
     def endHappyHour(self):
-        self.happyHour = False
+        self.HHOverride = False
+
+    def getHHOverride(self):
+        return self.HHOverride
 
     
 data = DataHandler()
@@ -203,10 +212,7 @@ def payment():
         curTicket.paid = True
         database.db.session.commit()
         return redirect('/index')
-    if data.getHappyHour():
-        return render_template('enterPaymentHappy.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}", user=current_user)
-    else:
-        return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}", user=current_user)
+    return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}", user=current_user)
 
 @app.route('/mLogin', methods = ['GET', 'POST'])
 def mLogin():
@@ -236,8 +242,7 @@ def mLogin():
 @app.route('/mView', methods = ['GET', 'POST'])
 @login_required
 def mView():
-    data.checkHH()
-    if data.getHappyHour():
+    if data.getHHOverride():
         form = endHappy()
         if form.validate_on_submit():
             data.endHappyHour()
