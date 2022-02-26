@@ -1,3 +1,4 @@
+from tracemalloc import start
 from app import db
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -5,6 +6,7 @@ from flask_login import UserMixin
 MAX_PLATE_LENGTH = 8
 MAX_NAME_LENGTH = 20
 MAX_FEE_LENGTH = 20
+MAX_HH_LENGHT = 5
 
 class Tickets(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,3 +39,11 @@ class ManagerLogin(db.Model, UserMixin):
 
     def __repr__(self):
         return "ID {}, Username {}, Password {}, First Name {}, Surname {}".format(self.id, self.plate, self.entry_time)
+
+class StoredHappyhour(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    start = db.Column(db.String(MAX_HH_LENGHT), nullable=True)
+    end = db.Column(db.String(MAX_HH_LENGHT), nullable=True)
+
+    def __repr__(self):
+        return "ID {}, Start {}, End {}".format(self.id, self.start, self.end)
