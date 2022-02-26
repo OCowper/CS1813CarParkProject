@@ -300,7 +300,7 @@ def viewReport():
         form.startdate.data = datetime.date(datetime.now())
         form.enddate.data = datetime.date(datetime.now())
         form.startTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
-        form.endTime.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
+        form.endTime.data = datetime.time(datetime.strptime("23:59", "%H:%M"))
 
 
     df = getDataFrame(os.path.join("app", "database.db"))
