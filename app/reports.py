@@ -6,6 +6,12 @@ import numpy as np
 import sqlite3
 from datetime import datetime, timedelta
 
+def mean(l):
+    if len(l) == 0:
+        return 0
+
+    else:
+        return sum(l) / len(l)
 
 def timestampToDateString(x):
     return datetime.fromtimestamp(x).strftime("%Y-%m-%d")
@@ -196,49 +202,83 @@ def lineGraphReport(df, date, startTime, endTime):
     except ValueError: # if there's no results for the date range / time range
         return None
 
+
+def getCarNumbers(df, date, startTime, endTime):
+    df = getTimePeriod(df, date, startTime, endTime)
+
+    numParked = getNumParked(df, startTime)
+    ids = pd.Series(numParked.index)
+    ids += 1 # indexes get messed up and is 1 behind the ticket id
+    
+    timeParkedDF = pd.DataFrame({"id": ids, "num_parked": numParked.values})
+
+    timeParkedDF['times'] = df.loc[df['id'].isin(timeParkedDF['id'])]['entry_time'].to_list()
+
+    hours = []
+    dateTimeList = [datetime.fromtimestamp(i) for i in timeParkedDF['times'].to_list()]
+    
+    for timeObj in dateTimeList:
+        if timeObj.hour not in hours:
+            hours.append(timeObj.hour)
+
+
+    carNumbersDict = {"Hour": [], "Car Numbers": []}
+
+    for i in range(len(hours)):
+        hour1 = hours[i]
+        hour2 = hours[i]+1
+        timeRange = [x.timestamp() for x in dateTimeList if datetime(1,1,1, hour1).time() <= 
+        x.time() <= datetime(1,1,1, hour2).time()]
+
+        carNumbersDict["Car Numbers"].append(timeParkedDF.loc[timeParkedDF["times"].isin(timeRange)]['num_parked'].to_list())
+        carNumbersDict["Hour"].append(f"{hour1:02}:00 - {hour2:02}:00")
+
+    return carNumbersDict
+
 def averageBarChart(df, date, startTime, endTime):
     try:
-        df = getTimePeriod(df, date, startTime, endTime)
+        barDict = {"Hour": [], "Average Cars Parked Per Hour": []}
+        carNumbersDict = getCarNumbers(df, date, startTime, endTime)
 
-        numParked = getNumParked(df, startTime)
-        ids = pd.Series(numParked.index)
-        ids += 1 # indexes get messed up and is 1 behind the ticket id
-        
-        timeParkedDF = pd.DataFrame({"id": ids, "num_parked": numParked.values})
-
-        timeParkedDF['times'] = df.loc[df['id'].isin(timeParkedDF['id'])]['entry_time'].to_list()
-
-        hours = []
-        dateTimeList = [datetime.fromtimestamp(i) for i in timeParkedDF['times'].to_list()]
-        
-        for timeObj in dateTimeList:
-            if timeObj.hour not in hours:
-                hours.append(timeObj.hour)
-        
-        barDict = {"Hour": [], "Average Cars Parked": []}
-        
-        print(hours)
-        for i in range(len(hours)):
-            hour1 = hours[i]
-            hour2 = hours[i]+1
-            timeRange = [x.timestamp() for x in dateTimeList if datetime(1,1,1, hour1).time() <= 
-            x.time() <= datetime(1,1,1, hour2).time()]
-            
-            # print([datetime.fromtimestamp(x) for x in timeRange], hour1, hour2)
-            carNumbers = timeParkedDF.loc[timeParkedDF["times"].isin(timeRange)]['num_parked'].to_list()
-            barDict["Hour"].append(f"{hour1:02}:00 - {hour2:02}:00")
-            if len(carNumbers) > 0:
-                barDict["Average Cars Parked"].append(int(sum(carNumbers) / len(carNumbers)))
-            else:
-                barDict["Average Cars Parked"].append(0)
+        barDict["Hour"] = carNumbersDict["Hour"]
+        barDict["Average Cars Parked Per Hour"] = [int(mean(x)) for x in carNumbersDict["Car Numbers"]]
 
         barDF = pd.DataFrame(barDict)
-        barGraph = px.bar(barDF, x="Hour", y="Average Cars Parked", title=f"Car Park Report ({date}) ({startTime[:-3]}-{endTime[:-3]})")
+        barGraph = px.bar(barDF, x="Hour", y="Average Cars Parked Per Hour", title=f"Average Cars Parked Per Hour ({date}) ({startTime[:-3]}-{endTime[:-3]})",
+        color_discrete_sequence =['blue']*len(barDict["Hour"]))
         return json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder)
 
-        # make this same method for minimum and maximum carks parked in an hour
-        # in views.py make a little validator to make sure start time and end time is >= 1 hour or 3600 seconds (60*60)
-        # PLOT when checkboxes are selected
+    except ValueError: # if there's no results for the date range / time range
+        return None
+
+def minimumBarChart(df, date, startTime, endTime):
+    try:
+        barDict = {"Hour": [], "Minimum Cars Parked Per Hour": []}
+        carNumbersDict = getCarNumbers(df, date, startTime, endTime)
+
+        barDict["Hour"] = carNumbersDict["Hour"]
+        barDict["Minimum Cars Parked Per Hour"] = [min(x) for x in carNumbersDict["Car Numbers"]]
+
+        barDF = pd.DataFrame(barDict)
+        barGraph = px.bar(barDF, x="Hour", y="Minimum Cars Parked Per Hour", title=f"Minimum Cars Parked Per Hour ({date}) ({startTime[:-3]}-{endTime[:-3]})",
+        color_discrete_sequence =['green']*len(barDict["Hour"]))
+        return json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder)
+
+    except ValueError: # if there's no results for the date range / time range
+        return None
+
+def maximumBarChart(df, date, startTime, endTime):
+    try:
+        barDict = {"Hour": [], "Maximum Cars Parked Per Hour": []}
+        carNumbersDict = getCarNumbers(df, date, startTime, endTime)
+
+        barDict["Hour"] = carNumbersDict["Hour"]
+        barDict["Maximum Cars Parked Per Hour"] = [max(x) for x in carNumbersDict["Car Numbers"]]
+
+        barDF = pd.DataFrame(barDict)
+        barGraph = px.bar(barDF, x="Hour", y="Maximum Cars Parked Per Hour", title=f"Maximum Cars Parked Per Hour ({date}) ({startTime[:-3]}-{endTime[:-3]})",
+        color_discrete_sequence =['red']*len(barDict["Hour"]))
+        return json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder)
 
     except ValueError: # if there's no results for the date range / time range
         return None

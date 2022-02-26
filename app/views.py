@@ -324,6 +324,14 @@ def viewReport():
             if form.averageCars.data:
                 graphList.append(averageBarChart(df.copy(), str(x), 
                 str(form.startTime.data), str(form.endTime.data)))
+            
+            if form.minimumCars.data:
+                graphList.append(minimumBarChart(df.copy(), str(x), 
+                str(form.startTime.data), str(form.endTime.data)))
+            
+            if form.maximumCars.data:
+                graphList.append(maximumBarChart(df.copy(), str(x), 
+                str(form.startTime.data), str(form.endTime.data)))
 
             x += timedelta(days=1)
 
