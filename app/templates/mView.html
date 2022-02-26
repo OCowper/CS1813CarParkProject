@@ -12,18 +12,19 @@
 		<input type="submit" value="View Reports">
 	</form>
 
-	<form class="schedulereportsBTN" action="/index" method="get">
-		<input type="submit" value="Schedule Reports">
-	</form>
     <form class = "HpyHrBTN" action="" method="post" novalidate>
         {{ form.hidden_tag() }}
         <p>{{ form.happyHourToggle() }}</p>
     </form>
 
     </p>
-    
+
     <form class = "ScheduleHpyHrBTN" action="/sHappyHour" method="get">
         <input type="submit" value="Schedule Happy Hour">
+    </form>
+
+    <form class = "mainmenuBTN" action="/index" method="get">
+        <input type="submit" value="Main Menu">
 
 
 

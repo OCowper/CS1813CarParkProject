@@ -382,7 +382,7 @@ body {
 
 
 
-.schedulereportsBTN input[type="submit"]{
+.mainmenuBTN input[type="submit"]{
     border: 0;
     background-color: none;
     display: block;
@@ -396,7 +396,7 @@ body {
     outline: 0;
 }
 
-.schedulereportsBTN input[type="submit"]:hover{
+.mainmenuBTN input[type="submit"]:hover{
     background: cyan;
 }
 
