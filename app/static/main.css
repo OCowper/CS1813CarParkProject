@@ -102,6 +102,7 @@ body {
     text-transform: uppercase;
     font-weight: 400;
     font-size: 30px;
+
 }
 
 .manager_box input[type="text"], .manager_box input[type = "password"] {
@@ -355,7 +356,7 @@ body {
     text-transform: uppercase;
     font-weight: 400;
     margin-top: 20px;
-    margin-left: 405px;
+    margin-left: 435px;
 
 }
 
