@@ -307,16 +307,23 @@ def viewReport():
 
 
     if request.method == 'POST':
-        table = getHTML(df, str(form.startdate.data), str(form.enddate.data), 
+        table = getHTML(df.copy(), str(form.startdate.data), str(form.enddate.data), 
         str(form.startTime.data), str(form.endTime.data))
 
         graphList = []
 
+        averageBarChart(df.copy(), str(form.startdate.data), str(form.startTime.data), str(form.endTime.data))
+        
         x = form.startdate.data
 
         while (x <= form.enddate.data):
-            graphList.append(lineGraphReport(df, str(x), 
-            str(form.startTime.data), str(form.endTime.data)))
+            if form.entriesexits.data:
+                graphList.append(lineGraphReport(df.copy(), str(x), 
+                str(form.startTime.data), str(form.endTime.data)))
+
+            if form.averageCars.data:
+                graphList.append(averageBarChart(df.copy(), str(x), 
+                str(form.startTime.data), str(form.endTime.data)))
 
             x += timedelta(days=1)
 
