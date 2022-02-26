@@ -6,6 +6,12 @@ import numpy as np
 import sqlite3
 from datetime import datetime, timedelta
 
+def mean(l):
+    if len(l) == 0:
+        return 0
+
+    else:
+        return sum(l) / len(l)
 
 def timestampToDateString(x):
     return datetime.fromtimestamp(x).strftime("%Y-%m-%d")
@@ -30,9 +36,7 @@ def checkSameDate(timestamp, dateString):
 def checkTimePeriod(timeToCheck, startTime, endTime):
     startTimeObj = datetime.strptime(f"{timestampToDateString(timeToCheck)} {startTime}", "%Y-%m-%d %H:%M:%S")
     endTimeObj = datetime.strptime(f"{timestampToDateString(timeToCheck)} {endTime}", "%Y-%m-%d %H:%M:%S")
-    if endTime == "00:00:00":
-        endTimeObj += timedelta(days=1)
-
+    
     timeToCheckDateTime = timestampToDateTime(timeToCheck).replace(microsecond=0) # truncate milliseconds
 
     return startTimeObj <= timeToCheckDateTime <= endTimeObj
@@ -82,8 +86,7 @@ def getHTMLDF(df, date, startTime, endTime, includeDate=False):
     htmlDF = None
 
     try:
-        df = df.loc[checkSameDateVect(df['entry_time'], date)]
-        df = df.loc[checkTimePeriodVect(df['entry_time'], startTime, endTime)]
+        df = getTimePeriod(df, date, startTime, endTime)
         htmlDF = df.drop(columns=['paid'])
         includeDict = {True: timestampToDateTimeString, False: timestampToTimeString}
         htmlDF['entry_time'] = df['entry_time'].map(includeDict[includeDate])
@@ -109,8 +112,6 @@ def getHTML(df, startDate, endDate, startTime, endTime):
     :param endTime (str): Latest time to look at in hh:mm:ss form
     :return (str): HTML code for the pandas dataframe as a table"""
 
-    """Supplements getHTML method, NOT to be used by itself"""
-
     htmlDF = None
     htmlDFList = []
     x = datetime.strptime(startDate, "%Y-%m-%d")
@@ -120,7 +121,7 @@ def getHTML(df, startDate, endDate, startTime, endTime):
         includeDate = not (x == endDateObj)
 
         while (x <= endDateObj):
-            htmlDFList.append(getHTMLDF(df.copy(), x.strftime("%Y-%m-%d"), startTime, endTime, includeDate=includeDate))
+            htmlDFList.append(getHTMLDF(df, x.strftime("%Y-%m-%d"), startTime, endTime, includeDate=includeDate))
             x += timedelta(days=1)
 
         if not all([len(i) == 0 for i in htmlDFList]):
@@ -157,8 +158,60 @@ def getHTML(df, startDate, endDate, startTime, endTime):
 </table>'''
 
 
+def getTimePeriod(df, date, startTime, endTime):
+    df = df.loc[checkSameDateVect(df['entry_time'], date)]
+    return df.loc[checkTimePeriodVect(df['entry_time'], startTime, endTime)]
+
+
+def getNumEntries(df, startTime):
+    entryTime = df['entry_time'].map(timestampToTimeString)
+    return entryTime.map(lambda x: countTimes(df['entry_time'], startTime, x))
+
+
+def getNumExits(df, startTime):
+    entryTime = df['entry_time'].map(timestampToTimeString)
+    return entryTime.map(lambda x: countTimes(df['exit_time'], startTime, x))
+
+
+def getNumParked(df, startTime):
+    return getNumEntries(df, startTime) - getNumExits(df, startTime)
+
+
+def getCarNumbers(df, date, startTime, endTime):
+    df = getTimePeriod(df, date, startTime, endTime)
+
+    numParked = getNumParked(df, startTime)
+    ids = pd.Series(numParked.index)
+    ids += 1 # indexes get messed up and is 1 behind the ticket id
+    
+    timeParkedDF = pd.DataFrame({"id": ids, "num_parked": numParked.values})
+
+    timeParkedDF['times'] = df.loc[df['id'].isin(timeParkedDF['id'])]['entry_time'].to_list()
+
+    hours = []
+    dateTimeList = [datetime.fromtimestamp(i) for i in timeParkedDF['times'].to_list()]
+    
+    for timeObj in dateTimeList:
+        if timeObj.hour not in hours:
+            hours.append(timeObj.hour)
+
+
+    carNumbersDict = {"Hour": [], "Car Numbers": []}
+
+    for i in range(len(hours)):
+        hour1 = hours[i]
+        hour2 = hours[i]+1
+        timeRange = [x.timestamp() for x in dateTimeList if datetime(1,1,1, hour1).time() <= 
+        x.time() <= datetime(1,1,1, hour2).time()]
+
+        carNumbersDict["Car Numbers"].append(timeParkedDF.loc[timeParkedDF["times"].isin(timeRange)]['num_parked'].to_list())
+        carNumbersDict["Hour"].append(f"{hour1:02}:00 - {hour2:02}:00")
+
+    return carNumbersDict
+
+
 def lineGraphReport(df, date, startTime, endTime):
-    """Creates Car Park Report Line Graph with no. cars parked, no. entries, no. exits against time for a specific date
+    """Creates Car Park Report Line Graph with no. cars parked, no. entries, no. exits against time for a specific date range
     :param df (pd.DataFame): Pandas dataframe
     :param date (str): Date in yyyy-mm-dd format to filter data for
     :param startTime (str): Earliest time to look at in hh:mm:ss form 
@@ -166,22 +219,62 @@ def lineGraphReport(df, date, startTime, endTime):
     :return (str): Plotly JSON text for the plotly.js script to draw the graph"""
 
     try:
-        df = df.loc[checkSameDateVect(df['entry_time'], date)]
-        df = df.loc[checkTimePeriodVect(df['entry_time'], startTime, endTime)]
-
+        df = getTimePeriod(df, date, startTime, endTime)
         
         entryTime = df['entry_time'].map(timestampToTimeString)
 
-        numEntries = entryTime.map(lambda x: countTimes(df['entry_time'], startTime, x))
-        numExits = entryTime.map(lambda x: countTimes(df['exit_time'], startTime, x))
+        numEntries = getNumEntries(df, startTime)
+        numExits = getNumExits(df, startTime)
 
         numParked = numEntries - numExits
 
         parkedCarsDF = pd.DataFrame({"Time": entryTime, "No. cars parked": numParked, "No. entries": numEntries,
                 "No. exits": numExits})
 
-        parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title=f"Car Park Report ({date}) ({startTime[:-3]}-{endTime[:-3]})")#, template="plotly_dark")
+        if len(parkedCarsDF) == 0:
+            return None
+
+        parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title=f"Car Park Report ({date}) ({startTime[:-3]}-{endTime[:-3]})")
         return json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
 
     except ValueError: # if there's no results for the date range / time range
         return None
+
+
+def barCharts(df, date, startTime, endTime, charts=[]):
+    """Creates Car Park Report Bar Charts for average no. cars parked, minimum and maximum against hour time periods for a specific date range
+    :param df (pd.DataFame): Pandas dataframe
+    :param date (str): Date in yyyy-mm-dd format to filter data for
+    :param startTime (str): Earliest time to look at in hh:mm:ss form 
+    :param endTime (str): Latest time to look at in hh:mm:ss form
+    :param charts (list): Which charts to plot (average, min, max)
+    :return (str): Plotly JSON text for the plotly.js script to draw the graph"""
+
+    chartDict = {"Average Cars Parked Per Hour": (lambda x: int(mean(x)), "blue"), 
+    "Minimum Cars Parked Per Hour": (min, "green"), 
+    "Maximum Cars Parked Per Hour": (max, "red")}
+
+    chartJSONs = []
+    try:
+        barDict = {}
+        carNumbersDict = getCarNumbers(df, date, startTime, endTime)
+        
+        barDict["Hour"] = carNumbersDict["Hour"]
+        for chartName in charts:
+            barDict[chartName] = [chartDict[chartName][0](x) for x in carNumbersDict["Car Numbers"]]
+            
+            barDF = pd.DataFrame(barDict)
+            
+            if len(barDF) == 0:
+                chartJSONs.append(None)
+
+            else:
+                barGraph = px.bar(barDF, x="Hour", y=chartName, title=f"{chartName} ({date}) ({startTime[:-3]}-{endTime[:-3]})",
+                color_discrete_sequence=[chartDict[chartName][1]]*len(barDict["Hour"]))
+
+                chartJSONs.append(json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder))
+
+    except ValueError: # if there's no results for the date range / time range
+        chartJSONs += [None] * len(charts)
+
+    return chartJSONs

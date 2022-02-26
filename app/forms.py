@@ -1,6 +1,6 @@
 from wsgiref.validate import validator
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, IntegerField, SelectField, DateField, TimeField
+from wtforms import StringField, SubmitField, PasswordField, IntegerField, DateField, TimeField, BooleanField
 from wtforms.validators import DataRequired
 
 
@@ -52,9 +52,14 @@ class setRecHappyHourForm(FlaskForm):
 
 
 class dateSelect(FlaskForm):
-    # rename to start date later
     startdate = DateField('Start Date: ', format="%Y-%m-%d")
     enddate = DateField('End Date: ', format="%Y-%m-%d")
     startTime = TimeField('Start Time: ', format="%H:%M")
     endTime = TimeField('End Time: ', format="%H:%M")
+    
+    averageCars = BooleanField("View average cars per hour chart")
+    minimumCars = BooleanField("View minimum cars per hour chart")
+    maximumCars = BooleanField("View maximum cars per hour chart")
+    entriesexits = BooleanField("View parked cars, entires and exits graph")
+    
     submit = SubmitField()
