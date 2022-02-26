@@ -233,6 +233,9 @@ def lineGraphReport(df, date, startTime, endTime):
         parkedCarsDF = pd.DataFrame({"Time": entryTime, "No. cars parked": numParked, "No. entries": numEntries,
                 "No. exits": numExits})
 
+        if len(parkedCarsDF) == 0:
+            return None
+
         parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title=f"Car Park Report ({date}) ({startTime[:-3]}-{endTime[:-3]})")
         return json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -264,14 +267,16 @@ def barCharts(df, date, startTime, endTime, charts=[]):
             
             barDF = pd.DataFrame(barDict)
             
-            barGraph = px.bar(barDF, x="Hour", y=chartName, title=f"{chartName} ({date}) ({startTime[:-3]}-{endTime[:-3]})",
-            color_discrete_sequence=[chartDict[chartName][1]]*len(barDict["Hour"]))
+            if len(barDF) == 0:
+                chartJSONs.append(None)
 
-            chartJSONs.append(json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder))
+            else:
+                barGraph = px.bar(barDF, x="Hour", y=chartName, title=f"{chartName} ({date}) ({startTime[:-3]}-{endTime[:-3]})",
+                color_discrete_sequence=[chartDict[chartName][1]]*len(barDict["Hour"]))
+
+                chartJSONs.append(json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder))
 
     except ValueError: # if there's no results for the date range / time range
         chartJSONs += [None] * len(charts)
 
     return chartJSONs
-
-# Fix bug for where if date range has results but time range doesn't there's an error when drawing bar charts or line graph
