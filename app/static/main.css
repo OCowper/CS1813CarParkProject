@@ -6,6 +6,10 @@
     box-sizing:border-box;
 }
 
+.nav-item {
+    padding-right: 20px;
+}
+
 a.active,a:hover{
     background: #1b9bff;
     transition: .7s;
