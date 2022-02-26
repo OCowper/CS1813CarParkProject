@@ -24,10 +24,6 @@ def ticketsUpdate(curNP, startTime):
     database.db.session.commit()
     data.setCurTicket(tempNum)
 
-def writeHH(start, end, f):
-        writing = start + " " + end + "\n"
-        f.write(writing)
-
 class DataHandler:
     def __init__(self):
         self.customerNP = None # str
@@ -109,20 +105,8 @@ class DataHandler:
     def endHappyHour(self):
         self.happyHour = False
 
-    
-
 
 data = DataHandler()
-
-
-if database.StoredHappyhour.start == None and database.storeHH.end == None:
-    initStart = ("00:00")
-    initEnd = ("00:00")
-    initTime = database.StoredHappyhour(start = initStart, end = initEnd)
-    database.db.session.add(initTime)
-else:
-    data.setHHStart(datetime.strptime(database.StoredHappyhour.start, "%H:%M"))
-    data.setHHEnd(datetime.strptime(database.StoredHappyhour.end, "%H:%M"))
 
 
 @app.route("/")
@@ -264,17 +248,13 @@ def sHappyHour():
     if request.method == 'GET':
         form.start.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
         form.end.data = datetime.time(datetime.strptime("00:00", "%H:%M"))
-    if (data.getHHStart() != None and data.getHHEnd() != None) or (data.getHHStart != data.endHHStart):
+    if data.getHHStart() != None and data.getHHEnd() != None:
         Ttitle = 'Set daily Happy Hour, currently set between ' + data.getHHStart().strftime("%H:%M") + ' and ' + data.getHHEnd().strftime("%H:%M")
     else:
         Ttitle = 'Set daily Happy Hour, currently set to none'
     if form.validate_on_submit():
         data.setHHStart(form.start.data)
         data.setHHEnd(form.end.data)
-        curTime = database.StoredHappyhour.query.first()
-        curTime.start = data.getHHStart().strftime("%H:%M")
-        curTime.end = data.getHHEnd().strftime("%H:%M")
-        database.db.session.commit()
         return redirect('/sHappyHour')
 
     return render_template('sHappyHour.html', title =Ttitle, form = form, user=current_user)
