@@ -86,7 +86,7 @@ body {
     width:360px;
     padding: 40px;
     position: absolute;
-    top: 55%;
+    top: 60%;
     left: 49%;
     transform: translate(-50%,-50%);
     text-align: center;
@@ -97,6 +97,7 @@ body {
     color: white;
     text-transform: uppercase;
     font-weight: 400;
+    font-size: 30px;
 }
 
 .manager_box input[type="text"], .manager_box input[type = "password"] {
@@ -105,7 +106,7 @@ body {
     display: block;
     width:200px;
     border-radius: 24px;
-    margin: 20px auto;
+    margin: 3px auto;
     text-align: center;
     padding: 14px 10px;
     transition: 0.2s;
@@ -193,6 +194,7 @@ body {
     color: white;
     text-transform: uppercase;
     font-weight: 300;
+    font-size: 30px;
 }
 
 .exit_box input[type="IntegerField"]{
@@ -341,6 +343,224 @@ body {
 .PaymentBox input[type="submit"]:hover{
     background: #2ecc71;
 }
+
+
+
+.mngrName{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-top: 20px;
+    margin-left: 405px;
+
+}
+
+
+.viewreportBTN input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid #2ecc71;
+    outline: 0;
+}
+
+.viewreportBTN input[type="submit"]:hover{
+    background: #2ecc71;
+}
+
+
+
+
+.schedulereportsBTN input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid cyan;
+    outline: 0;
+}
+
+.schedulereportsBTN input[type="submit"]:hover{
+    background: cyan;
+}
+
+
+
+
+.HpyHrBTN input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid crimson;
+    outline: 0;
+}
+
+.HpyHrBTN input[type="submit"]:hover{
+    background: crimson;
+}
+
+
+.ScheduleHpyHrBTN input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:200px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid purple;
+    outline: 0;
+}
+
+.ScheduleHpyHrBTN input[type="submit"]:hover{
+    background: purple;
+}
+
+.ScheduledReportsBox{
+    width:600px;
+    height: 230px;
+    padding: 40px;
+    position: absolute;
+    top: 35%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+    color:white;
+}
+
+.ScheduledReportsBox h2{
+    margin-top: -10px;
+}
+
+.ScheduledReportsBox input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:150px;
+    border-radius: 24px;
+    margin: 14px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid grey;
+    outline: 0;
+}
+
+.ScheduledReportsBox input[type="submit"]:hover{
+    background:grey;
+}
+
+
+.tables{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-left: 10px;
+    margin-top: 200px;
+    font-size: 18px;
+}
+
+.graphs{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-left: 10px;
+    font-size: 18px;
+}
+
+
+.SetHappyHourBox{
+    width:360px;
+    height: 340px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+    color: white;
+}
+
+.SetHappyHourBox h1{
+    color: white;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-left: 10px;
+    font-size: 16px;
+}
+
+.SetHappyHourBox input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:170px;
+    border-radius: 24px;
+    margin: 20px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid turquoise;
+    outline: 0;
+}
+
+.SetHappyHourBox input[type="submit"]:hover{
+    background: turquoise;
+}
+
+
+
+.HappyHourPriceBox{
+    width:400px;
+    height: 250px;
+    padding: 40px;
+    position: absolute;
+    top: 55%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    background: #191919;
+    color: white;
+}
+
+.HappyHourPriceBox input[type="submit"]{
+    border: 0;
+    background-color: none;
+    display: block;
+    width:170px;
+    border-radius: 24px;
+    margin: 45px auto;
+    text-align: center;
+    padding: 14px 10px;
+    transition: 0.25s;
+    border: 2px solid turquoise;
+    outline: 0;
+}
+
+.HappyHourPriceBox input[type="submit"]:hover{
+    background: turquoise;
+}
+
 
 
 .dataframe {

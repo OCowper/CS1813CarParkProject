@@ -1,20 +1,18 @@
 {% extends "base.html" %}
 
 {% block head %}
-	<h1>Report View</h1>
-	<h2>Current Number of Cars: {{ numCars }} </h2>
+
   {% endblock %}
-  
+
   {% block body %}
-  
-  <br>
-  <br>
-  
-  <h2>Date + Time Range:</h2>
 
   <br>
+  <br>
 
-  <form action="" method="POST" novalidate>
+
+
+  <form class="ScheduledReportsBox"action="" method="POST" novalidate>
+	<h2 >Current Number of Cars: {{ numCars }} </h2>
     {{ form.startdate.label }}
     {{ form.startdate }}
     {{ form.enddate.label }}
@@ -26,19 +24,19 @@
     {{ form.submit() }}
     {{ form.hidden_tag() }}
   </form>
-  
-  <br>
+
   <br>
 
-	<h2>Tables: </h2>
-  
-  <br>
+
+	<h2 class="tables">Tables: </h2>
+
+
   <br>
 
   {{ table|safe }}
-  
+
 <br>
-<h2>Graphs: </h2>
+<h2 class="graphs">Graphs: </h2>
 <br>
 
 {% for graphJSON in graphList %}

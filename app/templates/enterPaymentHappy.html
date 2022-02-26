@@ -6,9 +6,8 @@
 {% block body %}
 
 
-    <form class = "PaymentBox" action="" method="post" novalidate>
-		<h3> Amount Due: £{{ price }} </h3>
-		
+    <form class="HappyHourPriceBox"action="" method="post" novalidate>
+		<h3> Amount Due: £{{ price }}, It's Happy Hour! </h3>
         {{ form.hidden_tag() }}
         <p>{{ form.submit() }}</p>
     </form>
