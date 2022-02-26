@@ -36,9 +36,7 @@ def checkSameDate(timestamp, dateString):
 def checkTimePeriod(timeToCheck, startTime, endTime):
     startTimeObj = datetime.strptime(f"{timestampToDateString(timeToCheck)} {startTime}", "%Y-%m-%d %H:%M:%S")
     endTimeObj = datetime.strptime(f"{timestampToDateString(timeToCheck)} {endTime}", "%Y-%m-%d %H:%M:%S")
-    if endTime == "00:00:00":
-        endTimeObj += timedelta(days=1)
-
+    
     timeToCheckDateTime = timestampToDateTime(timeToCheck).replace(microsecond=0) # truncate milliseconds
 
     return startTimeObj <= timeToCheckDateTime <= endTimeObj
