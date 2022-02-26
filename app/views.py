@@ -6,7 +6,7 @@ from app.forms import *
 from app import database
 from datetime import datetime, timedelta
 from app.reports import *
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 
 
@@ -225,7 +225,7 @@ def mLogin():
             curUsername = form.username.data
             curLogin = database.ManagerLogin.query.filter_by(username = curUsername).first()
             if curLogin != None:
-                if curLogin.password == form.password.data: #if check_password_hash(curLogin.password, form.password.data): 
+                if check_password_hash(curLogin.password, form.password.data): 
                     flash("Logged in successfully!", category="success")
                     login_user(curLogin, remember=True)
                     return redirect('/mView')
@@ -326,11 +326,6 @@ def viewReport():
     return render_template('viewReport.html', title = 'View Reports', form=form, 
     numCars = carsInside, graphList=[], user=current_user)
 
-# newUser = database.ManagerLogin(id=something, username=something, 
-#   password=generate_password_hash(somepassword, method='sha256'), first_name=something, surname=something)
-# database.db.session.add(newUser)
-# database.db.session.commit()
 
 # Left to do:
-# * New dummy_values.sql with hashed passwords
 # * New dummy_values.sql with GOOD dummy values for the tickets
