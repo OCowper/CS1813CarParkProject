@@ -164,43 +164,19 @@ def getTimePeriod(df, date, startTime, endTime):
     df = df.loc[checkSameDateVect(df['entry_time'], date)]
     return df.loc[checkTimePeriodVect(df['entry_time'], startTime, endTime)]
 
+
 def getNumEntries(df, startTime):
     entryTime = df['entry_time'].map(timestampToTimeString)
     return entryTime.map(lambda x: countTimes(df['entry_time'], startTime, x))
+
 
 def getNumExits(df, startTime):
     entryTime = df['entry_time'].map(timestampToTimeString)
     return entryTime.map(lambda x: countTimes(df['exit_time'], startTime, x))
 
+
 def getNumParked(df, startTime):
-    return getNumEntries(df, startTime) - getNumExits(df, startTime)  
-
-def lineGraphReport(df, date, startTime, endTime):
-    """Creates Car Park Report Line Graph with no. cars parked, no. entries, no. exits against time for a specific date
-    :param df (pd.DataFame): Pandas dataframe
-    :param date (str): Date in yyyy-mm-dd format to filter data for
-    :param startTime (str): Earliest time to look at in hh:mm:ss form 
-    :param endTime (str): Latest time to look at in hh:mm:ss form
-    :return (str): Plotly JSON text for the plotly.js script to draw the graph"""
-
-    try:
-        df = getTimePeriod(df, date, startTime, endTime)
-        
-        entryTime = df['entry_time'].map(timestampToTimeString)
-
-        numEntries = getNumEntries(df, startTime)
-        numExits = getNumExits(df, startTime)
-
-        numParked = numEntries - numExits
-
-        parkedCarsDF = pd.DataFrame({"Time": entryTime, "No. cars parked": numParked, "No. entries": numEntries,
-                "No. exits": numExits})
-
-        parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title=f"Car Park Report ({date}) ({startTime[:-3]}-{endTime[:-3]})")
-        return json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
-
-    except ValueError: # if there's no results for the date range / time range
-        return None
+    return getNumEntries(df, startTime) - getNumExits(df, startTime)
 
 
 def getCarNumbers(df, date, startTime, endTime):
@@ -235,50 +211,67 @@ def getCarNumbers(df, date, startTime, endTime):
 
     return carNumbersDict
 
-def averageBarChart(df, date, startTime, endTime):
+
+def lineGraphReport(df, date, startTime, endTime):
+    """Creates Car Park Report Line Graph with no. cars parked, no. entries, no. exits against time for a specific date range
+    :param df (pd.DataFame): Pandas dataframe
+    :param date (str): Date in yyyy-mm-dd format to filter data for
+    :param startTime (str): Earliest time to look at in hh:mm:ss form 
+    :param endTime (str): Latest time to look at in hh:mm:ss form
+    :return (str): Plotly JSON text for the plotly.js script to draw the graph"""
+
     try:
-        barDict = {"Hour": [], "Average Cars Parked Per Hour": []}
-        carNumbersDict = getCarNumbers(df, date, startTime, endTime)
+        df = getTimePeriod(df, date, startTime, endTime)
+        
+        entryTime = df['entry_time'].map(timestampToTimeString)
 
-        barDict["Hour"] = carNumbersDict["Hour"]
-        barDict["Average Cars Parked Per Hour"] = [int(mean(x)) for x in carNumbersDict["Car Numbers"]]
+        numEntries = getNumEntries(df, startTime)
+        numExits = getNumExits(df, startTime)
 
-        barDF = pd.DataFrame(barDict)
-        barGraph = px.bar(barDF, x="Hour", y="Average Cars Parked Per Hour", title=f"Average Cars Parked Per Hour ({date}) ({startTime[:-3]}-{endTime[:-3]})",
-        color_discrete_sequence =['blue']*len(barDict["Hour"]))
-        return json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder)
+        numParked = numEntries - numExits
+
+        parkedCarsDF = pd.DataFrame({"Time": entryTime, "No. cars parked": numParked, "No. entries": numEntries,
+                "No. exits": numExits})
+
+        parkedCarsGraph = px.line(parkedCarsDF, x="Time", y=parkedCarsDF.columns.values[1:], title=f"Car Park Report ({date}) ({startTime[:-3]}-{endTime[:-3]})")
+        return json.dumps(parkedCarsGraph, cls=plotly.utils.PlotlyJSONEncoder)
 
     except ValueError: # if there's no results for the date range / time range
         return None
 
-def minimumBarChart(df, date, startTime, endTime):
+
+def barCharts(df, date, startTime, endTime, charts=[]):
+    """Creates Car Park Report Bar Charts for average no. cars parked, minimum and maximum against hour time periods for a specific date range
+    :param df (pd.DataFame): Pandas dataframe
+    :param date (str): Date in yyyy-mm-dd format to filter data for
+    :param startTime (str): Earliest time to look at in hh:mm:ss form 
+    :param endTime (str): Latest time to look at in hh:mm:ss form
+    :param charts (list): Which charts to plot (average, min, max)
+    :return (str): Plotly JSON text for the plotly.js script to draw the graph"""
+
+    chartDict = {"Average Cars Parked Per Hour": (lambda x: int(mean(x)), "blue"), 
+    "Minimum Cars Parked Per Hour": (min, "green"), 
+    "Maximum Cars Parked Per Hour": (max, "red")}
+
+    chartJSONs = []
     try:
-        barDict = {"Hour": [], "Minimum Cars Parked Per Hour": []}
+        barDict = {}
         carNumbersDict = getCarNumbers(df, date, startTime, endTime)
-
+        
         barDict["Hour"] = carNumbersDict["Hour"]
-        barDict["Minimum Cars Parked Per Hour"] = [min(x) for x in carNumbersDict["Car Numbers"]]
+        for chartName in charts:
+            barDict[chartName] = [chartDict[chartName][0](x) for x in carNumbersDict["Car Numbers"]]
+            
+            barDF = pd.DataFrame(barDict)
+            
+            barGraph = px.bar(barDF, x="Hour", y=chartName, title=f"{chartName} ({date}) ({startTime[:-3]}-{endTime[:-3]})",
+            color_discrete_sequence=[chartDict[chartName][1]]*len(barDict["Hour"]))
 
-        barDF = pd.DataFrame(barDict)
-        barGraph = px.bar(barDF, x="Hour", y="Minimum Cars Parked Per Hour", title=f"Minimum Cars Parked Per Hour ({date}) ({startTime[:-3]}-{endTime[:-3]})",
-        color_discrete_sequence =['green']*len(barDict["Hour"]))
-        return json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder)
+            chartJSONs.append(json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder))
 
     except ValueError: # if there's no results for the date range / time range
-        return None
+        chartJSONs += [None] * len(charts)
 
-def maximumBarChart(df, date, startTime, endTime):
-    try:
-        barDict = {"Hour": [], "Maximum Cars Parked Per Hour": []}
-        carNumbersDict = getCarNumbers(df, date, startTime, endTime)
+    return chartJSONs
 
-        barDict["Hour"] = carNumbersDict["Hour"]
-        barDict["Maximum Cars Parked Per Hour"] = [max(x) for x in carNumbersDict["Car Numbers"]]
-
-        barDF = pd.DataFrame(barDict)
-        barGraph = px.bar(barDF, x="Hour", y="Maximum Cars Parked Per Hour", title=f"Maximum Cars Parked Per Hour ({date}) ({startTime[:-3]}-{endTime[:-3]})",
-        color_discrete_sequence =['red']*len(barDict["Hour"]))
-        return json.dumps(barGraph, cls=plotly.utils.PlotlyJSONEncoder)
-
-    except ValueError: # if there's no results for the date range / time range
-        return None
+# Fix bug for where if date range has results but time range doesn't there's an error when drawing bar charts or line graph

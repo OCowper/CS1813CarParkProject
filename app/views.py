@@ -311,8 +311,6 @@ def viewReport():
         str(form.startTime.data), str(form.endTime.data))
 
         graphList = []
-
-        averageBarChart(df.copy(), str(form.startdate.data), str(form.startTime.data), str(form.endTime.data))
         
         x = form.startdate.data
 
@@ -321,17 +319,13 @@ def viewReport():
                 graphList.append(lineGraphReport(df.copy(), str(x), 
                 str(form.startTime.data), str(form.endTime.data)))
 
-            if form.averageCars.data:
-                graphList.append(averageBarChart(df.copy(), str(x), 
-                str(form.startTime.data), str(form.endTime.data)))
-            
-            if form.minimumCars.data:
-                graphList.append(minimumBarChart(df.copy(), str(x), 
-                str(form.startTime.data), str(form.endTime.data)))
-            
-            if form.maximumCars.data:
-                graphList.append(maximumBarChart(df.copy(), str(x), 
-                str(form.startTime.data), str(form.endTime.data)))
+
+            barChartDict = {"Average Cars Parked Per Hour": form.averageCars.data, 
+            "Minimum Cars Parked Per Hour": form.minimumCars.data, 
+            "Maximum Cars Parked Per Hour": form.maximumCars.data}
+
+            graphList += barCharts(df.copy(), str(x), str(form.startTime.data), str(form.endTime.data),
+            charts=[key for key, value in barChartDict.items() if value])
 
             x += timedelta(days=1)
 
