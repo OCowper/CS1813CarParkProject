@@ -82,32 +82,32 @@ then to leave the virtual environment type:
 ```bash
 deactivate
 ```
-## Authors
-
-- [@Charles Kasina](mailto:charles.kasina.2021@live.rhul.ac.uk)
-- [@Oscar Cowper](mailto:oscar.cowper.2021@live.rhul.ac.uk)
-- [@Zuhayr Mohsen](mailto:mohammed.mohsen.2021@live.rhul.ac.uk)
-- [@Yazan Al-Arab](mailto:yazan.al-arab.2021@live.rhul.ac.uk)
 
 ## Usage/Examples
-This shows how a customer would enter the car park:
-![Entering and exiting car park animation](screenshots/enterexit.gif?raw=true "Entering and exiting car park animation")
+#### This shows how a customer would enter the car park:
 
-This shows how a manager would login:
+![Entering and exiting car park animation](screenshots/enterexit.gif?raw=true)
+
+
+#### This shows how a manager would login:
+
 ![Manager login](screenshots/managerlogin.gif?raw=true "Manager login")
 
-This shows how a manager would start/end happy hour manually or schedule it:
-![Manager start/end happy hour](screenshots/happyhour.gif?raw=true "Manager start/end happy hour")
+
+#### This shows how a manager would start/end happy hour manually or schedule it:
+
+![Manager start/end happy hour](screenshots/happyhour.gif?raw=true)
 
 
-This shows how a manager would view reports with a table and graphs:
-![Manger viewing reports](screenshots/reportview.gif?raw=true "Manger viewing reports")
+#### This shows how a manager would view reports with a table and graphs:
+
+![Manger viewing reports](screenshots/reportview.gif?raw=true)
 
 ## FAQ
 
 #### I tried to open the website and got an 'Access to 127.0.0.1 was denied' error
 
-![Access denied screenshot](screenshots/accessdenied.png?raw=true "Access denied screenshot")
+![Access denied screenshot](screenshots/accessdenied.png?raw=true)
 
 Chances are you've not started the web server
 
@@ -120,3 +120,9 @@ However if this issue persists, clear your browser cookies and visit the website
 
 (Add link later)
 
+## Authors
+
+- [@Charles Kasina](mailto:charles.kasina.2021@live.rhul.ac.uk)
+- [@Oscar Cowper](mailto:oscar.cowper.2021@live.rhul.ac.uk)
+- [@Zuhayr Mohsen](mailto:mohammed.mohsen.2021@live.rhul.ac.uk)
+- [@Yazan Al-Arab](mailto:yazan.al-arab.2021@live.rhul.ac.uk)
