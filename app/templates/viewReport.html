@@ -9,34 +9,52 @@
   <br>
   <br>
 
-
-
   <form class="ScheduledReportsBox"action="" method="POST" novalidate>
-	<h2 >Current Number of Cars: {{ numCars }} </h2>
-    {{ form.startdate.label }}
-    {{ form.startdate }}
-    {{ form.enddate.label }}
-    {{ form.enddate }}
-    {{ form.startTime.label }}
-    {{ form.startTime }}
-    {{ form.endTime.label }}
-    {{ form.endTime }}
-    <br>
-    {{ form.averageCars.label }}
-    {{ form.averageCars }}
-    {{ form.minimumCars.label }}
-    {{ form.minimumCars }}
-    <br>
-    {{ form.maximumCars.label }}
-    {{ form.maximumCars }}
-    {{ form.entriesexits.label }}
-    {{ form.entriesexits }}
+    <h2 >Current Number of Cars: {{ numCars }} </h2>
+    
+    <div class="reportDateTime">
+      
+      <div class="reportLine">
+        {{ form.startdate.label(class_="reportLabel")}}
+        {{ form.startdate }}
+        
+        {{ form.enddate.label(class_="reportLabel") }}
+        {{ form.enddate }}
+      </div>
+      
+      <div class="reportLine">
+        {{ form.startTime.label(class_="reportLabel") }}
+        {{ form.startTime }}
+        
+        {{ form.endTime.label(class_="reportLabel") }}
+        {{ form.endTime }}
+      </div>
+      
+    </div>
+
+    <div class="reportLine">
+      {{ form.averageCars.label(class_="reportLabel") }}
+      {{ form.averageCars }}
+      
+      {{ form.minimumCars.label(class_="reportLabel") }}
+      {{ form.minimumCars }}
+    </div>
+    
+    <div class="reportLine">
+      {{ form.maximumCars.label(class_="reportLabel") }}
+      {{ form.maximumCars }}
+      
+      {{ form.entriesexits.label(class_="reportLabel") }}
+      {{ form.entriesexits }}
+    </div>
+      
     {{ form.submit() }}
     {{ form.hidden_tag() }}
   </form>
 
+  {% for i in range(10) %}
   <br>
-
+  {% endfor %}
 
 	<h2 class="tables">Tables: </h2>
 

@@ -441,9 +441,10 @@ body {
 }
 
 .ScheduledReportsBox{
-    width:600px;
-    height: 230px;
+    width: 800px;
+    height: 400px;
     padding: 40px;
+    margin-top: 40px;
     position: absolute;
     top: 35%;
     left: 49%;
@@ -455,6 +456,7 @@ body {
 
 .ScheduledReportsBox h2{
     margin-top: -10px;
+    margin-bottom: 40px;
 }
 
 .ScheduledReportsBox input[type="submit"]{
@@ -464,6 +466,7 @@ body {
     width:150px;
     border-radius: 24px;
     margin: 14px auto;
+    margin-top: 30px;
     text-align: center;
     padding: 14px 10px;
     transition: 0.25s;
@@ -475,6 +478,17 @@ body {
     background:grey;
 }
 
+.reportLabel {
+    margin-left: 30px;
+}
+
+.reportLine {
+    margin-top: 15px;
+}
+
+.reportDateTime {
+    margin-bottom: 40px;
+}
 
 .tables{
     color: white;
