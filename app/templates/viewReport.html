@@ -9,45 +9,45 @@
   <br>
   <br>
 
-  <form class="ScheduledReportsBox"action="" method="POST" novalidate>
+  <form class="ReportsBox"action="" method="POST" novalidate>
     <h2 >Current Number of Cars: {{ numCars }} </h2>
-    
+
     <div class="reportDateTime">
-      
+
       <div class="reportLine">
         {{ form.startdate.label(class_="reportLabel")}}
         {{ form.startdate }}
-        
+
         {{ form.enddate.label(class_="reportLabel") }}
         {{ form.enddate }}
       </div>
-      
+
       <div class="reportLine">
         {{ form.startTime.label(class_="reportLabel") }}
         {{ form.startTime }}
-        
+
         {{ form.endTime.label(class_="reportLabel") }}
         {{ form.endTime }}
       </div>
-      
+
     </div>
 
     <div class="reportLine">
       {{ form.averageCars.label(class_="reportLabel") }}
       {{ form.averageCars }}
-      
+
       {{ form.minimumCars.label(class_="reportLabel") }}
       {{ form.minimumCars }}
     </div>
-    
+
     <div class="reportLine">
       {{ form.maximumCars.label(class_="reportLabel") }}
       {{ form.maximumCars }}
-      
+
       {{ form.entriesexits.label(class_="reportLabel") }}
       {{ form.entriesexits }}
     </div>
-      
+
     {{ form.submit() }}
     {{ form.hidden_tag() }}
   </form>

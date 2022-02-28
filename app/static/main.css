@@ -356,7 +356,7 @@ body {
     text-transform: uppercase;
     font-weight: 400;
     margin-top: 20px;
-    margin-left: 435px;
+    margin-left: 425px;
 
 }
 
@@ -401,6 +401,13 @@ body {
 }
 
 
+.button_text{
+    color: white;
+    font-size: 12px;
+    margin-left: 510px;
+}
+
+
 
 
 .HpyHrBTN input[type="submit"]{
@@ -419,6 +426,7 @@ body {
 
 .HpyHrBTN input[type="submit"]:hover{
     background: crimson;
+
 }
 
 
@@ -440,7 +448,7 @@ body {
     background: purple;
 }
 
-.ScheduledReportsBox{
+.ReportsBox{
     width: 800px;
     height: 400px;
     padding: 40px;
@@ -454,12 +462,12 @@ body {
     color:white;
 }
 
-.ScheduledReportsBox h2{
+.ReportsBox h2{
     margin-top: -10px;
     margin-bottom: 40px;
 }
 
-.ScheduledReportsBox input[type="submit"]{
+.ReportsBox input[type="submit"]{
     border: 0;
     background-color: none;
     display: block;
@@ -474,7 +482,7 @@ body {
     outline: 0;
 }
 
-.ScheduledReportsBox input[type="submit"]:hover{
+.ReportsBox input[type="submit"]:hover{
     background:grey;
 }
 
