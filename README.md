@@ -64,7 +64,7 @@ Start the web server
 ```
 
 If you don't already have an app/database.db file, 
-the software will automatically create one for you with pre-set dummy values
+the software will automatically create one for you with pre-set dummy values, default usernames and passwords are (user1, pass1), (user2, pass2), (user3, pass3)
 
 
 Visit the website at: 
