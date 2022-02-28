@@ -1,5 +1,3 @@
-#REMMEBER TO GITIGNORE FILE.TXT AND HAVE IT CREATE A FRESH VERSION
-
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
@@ -9,10 +7,12 @@ from app.reports import *
 from werkzeug.security import check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 
-
 import os
 import time
 import math
+
+
+        
 
 def ticketsUpdate(curNP, startTime):
     curTickets = database.Tickets.query.order_by(database.Tickets.id)
@@ -31,13 +31,16 @@ def writeHH(start, end, f):
         f.write(writing)
 
 def readHH():
-    file = open("file.txt", "r")
-    line = file.readline()
-    line = line.strip()
-    [start,end]=line.split(' ')
-    data.setHHStart(datetime.time(datetime.strptime(start, "%H:%M:%p")))
-    data.setHHEnd(datetime.time(datetime.strptime(end, "%H:%M:%p")))
-    file.close()
+    try:
+        file = open("file.txt", "r")
+        line = file.readline()
+        line = line.strip()
+        [start,end]=line.split(' ')
+        data.setHHStart(datetime.time(datetime.strptime(start, "%H:%M:%p")))
+        data.setHHEnd(datetime.time(datetime.strptime(end, "%H:%M:%p")))
+        file.close()
+    except:
+        print("  Initialising  ")
 
 class DataHandler:
     def __init__(self):
@@ -129,6 +132,8 @@ class DataHandler:
 
     
 data = DataHandler()
+
+
 
 readHH()
 

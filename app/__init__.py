@@ -1,11 +1,14 @@
 import sqlite3
 
+
 from os import path
 from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from .dummy_tickets import insertTickets
+
+
 
 def create_database(app):
     if not path.exists(path.join("app", "database.db")):
