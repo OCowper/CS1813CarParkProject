@@ -1,4 +1,3 @@
-from tracemalloc import start
 from app import db
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -7,6 +6,8 @@ MAX_PLATE_LENGTH = 8
 MAX_NAME_LENGTH = 20
 MAX_FEE_LENGTH = 20
 MAX_HH_LENGHT = 5
+
+# This defines the tables for the SQL database using SQLAlchemy
 
 class Tickets(db.Model):
     id = db.Column(db.Integer, primary_key=True)

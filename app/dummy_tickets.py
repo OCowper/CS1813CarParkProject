@@ -69,7 +69,7 @@ def insertTickets():
     global used_plates
     try:
         print("Connecting to database.db")
-        conn = sqlite3.connect(path.join('app', 'database.db')) # inserTickets is called from __init__.py which which thinks it's outside the app folder
+        conn = sqlite3.connect(path.join('app', 'database.db')) # insertTickets is called from __init__.py which which thinks it's outside the app folder
         cur = conn.cursor()
         print("Connected to database")
         print()

@@ -1,3 +1,7 @@
+import os
+import time
+import math
+
 from flask import render_template, flash, redirect, request
 from app import app
 from app.forms import *
@@ -7,12 +11,6 @@ from app.reports import *
 from werkzeug.security import check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 
-import os
-import time
-import math
-
-
-        
 
 def ticketsUpdate(curNP, startTime):
     curTickets = database.Tickets.query.order_by(database.Tickets.id)
@@ -26,9 +24,11 @@ def ticketsUpdate(curNP, startTime):
     database.db.session.commit()
     data.setCurTicket(tempNum)
 
+
 def writeHH(start, end, f):
         writing = start + " " + end
         f.write(writing)
+
 
 def readHH():
     try:
@@ -42,6 +42,7 @@ def readHH():
     except:
         print("  Initialising  ")
 
+
 class DataHandler:
     def __init__(self):
         self.customerNP = None # str
@@ -50,8 +51,6 @@ class DataHandler:
         self.HHOverride = False
         self.curTicket = None # ticket
         self.curTID = None # int
-        #self.HHStart = datetime.time(datetime.strptime("00:00:AM", "%H:%M:%p")) # datetime
-        #self.HHEnd = datetime.time(datetime.strptime("00:00:AM", "%H:%M:%p")) # datetime
         self.HHStart = None
         self.HHEnd = None
 
@@ -133,11 +132,7 @@ class DataHandler:
     
 data = DataHandler()
 
-
-
 readHH()
-
-
 
 
 @app.route("/")
@@ -163,6 +158,7 @@ def login():
             return redirect('/entry')
     return render_template('enterNP.html', title='Enter Your Customer Number Plate', form=form, user=current_user)
 
+
 @app.route('/entry', methods = ['GET', 'POST'])
 def entry():
     if current_user.is_authenticated:
@@ -173,6 +169,7 @@ def entry():
     if form.validate_on_submit():
         return redirect('/index')
     return render_template('entryB.html', title = 'Press to Enter', form = form, number = data.getCurTicket(), user=current_user)
+
 
 @app.route('/signOut', methods = ['GET', 'POST'])
 def signOut():
@@ -218,6 +215,7 @@ def payment():
         database.db.session.commit()
         return redirect('/index')
     return render_template('enterPayment.html', title = 'Please Pay Now', form = form, price=f"{data.calculatePrice():.2f}", user=current_user)
+
 
 @app.route('/mLogin', methods = ['GET', 'POST'])
 def mLogin():
