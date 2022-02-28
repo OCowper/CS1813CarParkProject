@@ -244,3 +244,4 @@ cython_debug/
 
 # Personal files
 app/database.db
+file.txt
