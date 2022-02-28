@@ -40,10 +40,3 @@ class ManagerLogin(db.Model, UserMixin):
     def __repr__(self):
         return "ID {}, Username {}, Password {}, First Name {}, Surname {}".format(self.id, self.plate, self.entry_time)
 
-class StoredHappyhour(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    start = db.Column(db.String(MAX_HH_LENGHT), nullable=True)
-    end = db.Column(db.String(MAX_HH_LENGHT), nullable=True)
-
-    def __repr__(self):
-        return "ID {}, Start {}, End {}".format(self.id, self.start, self.end)
