@@ -116,9 +116,8 @@ However if this issue persists, clear your browser cookies and visit the website
 
 ## Documentation
 
-[Documentation](https://linktodocumentation)
+[Documentation](https://rhul-my.sharepoint.com/:w:/g/personal/zkac412_live_rhul_ac_uk/Ecjk08yE8aVHma1nfC-z8O8B1Znn72ZSLkFC8jB1GeYN8g?e=Jgymg8)
 
-(Add link later)
 
 ## Authors
 
