@@ -121,7 +121,7 @@ However if this issue persists, clear your browser cookies and visit the website
 
 ## Authors
 
-- [@Charles Kasina](mailto:charles.kasina.2021@live.rhul.ac.uk)
+- @Charles Kasina
 - [@Oscar Cowper](mailto:oscar.cowper.2021@live.rhul.ac.uk)
-- [@Zuhayr Mohsen](mailto:mohammed.mohsen.2021@live.rhul.ac.uk)
-- [@Yazan Al-Arab](mailto:yazan.al-arab.2021@live.rhul.ac.uk)
+- @Zuhayr Mohsen
+- @Yazan Al-Arab
