@@ -8,13 +8,13 @@ This is a software representation of the 'Holborn Car Park System' described in 
 ### Clone the project
 
 ```bash
-  git clone https://github.com/RHUL-CS-Projects/CS1813_2022_08.git
+  git clone https://github.com/OCowper/CS1813CarParkProject.git
 ```
 
 ### Go to the project directory
 
 ```bash
-  cd CS1813_2022_08
+  cd CS1813CarParkProject
 ```
 
 **NB: The way this next command is ran varies depending on installation of python,
@@ -112,11 +112,6 @@ deactivate
 Chances are you've not started the web server
 
 However if this issue persists, clear your browser cookies and visit the website again
-
-
-## Documentation
-
-[Documentation](https://rhul-my.sharepoint.com/:w:/g/personal/zkac412_live_rhul_ac_uk/Ecjk08yE8aVHma1nfC-z8O8B1Znn72ZSLkFC8jB1GeYN8g?e=Jgymg8)
 
 
 ## Authors
